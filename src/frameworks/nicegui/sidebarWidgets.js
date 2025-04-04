@@ -9,7 +9,6 @@ import OptionMenu from "./widgets/optionMenu"
 import Slider from "./widgets/slider"
 import { CheckBox, RadioButton } from "./widgets/checkButton"
 import { Input, Text } from "./widgets/input"
-import SpinBox from "./widgets/spinBox"
 
 import MainWindowImage from "./assets/widgets/main/mainwindow.png"
 import TopLevelImage from "./assets/widgets/main/Toplevel.png"
@@ -22,7 +21,6 @@ import SliderImage from "./assets/widgets/main/slider.png"
 import DropDownImage from "./assets/widgets/main/dropdown.png"
 import CheckButtonImage from "./assets/widgets/main/check.png"
 import RadioButtonImage from "./assets/widgets/main/radio.png"
-import SpinBoxImage from "./assets/widgets/main/spinbox.png"
 
 
 const NiceguiWidgets = [
@@ -92,12 +90,6 @@ const NiceguiWidgets = [
         link: "https://github.com/ChQiuHuang/PyUIBuilder-nicegui",
         widgetClass: OptionMenu
     },
-    {
-        name: "Spinbox",
-        img: SpinBoxImage,
-        link: "https://github.com/ChQiuHuang/PyUIBuilder-nicegui",
-        widgetClass: SpinBox
-    },
 
 ]
 
@@ -118,7 +110,6 @@ export default NiceguiWidgets
         "Frame": set(),
         "LabelFrame": set(),
         "PanedWindow": set(),
-        "SpinBox": set(),
         "OptionMenu": set(),
         "Canvas": set(),
         "TopLevel": set(),
