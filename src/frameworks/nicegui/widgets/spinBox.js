@@ -2,10 +2,10 @@ import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { DownOutlined, UpOutlined } from "@ant-design/icons"
-import {TkinterBase, TkinterWidgetBase} from "./base"
+import { NiceGUIWidgetBase } from "./base"
 
-
-class SpinBox extends TkinterWidgetBase{
+// TODO: https://github.com/TomSchimansky/CustomTkinter/wiki/Create-new-widgets-(Spinbox)
+class SpinBox extends NiceGUIWidgetBase{
 
     static widgetType = "spin_box"
     static displayName = "Spin Box"
@@ -72,10 +72,10 @@ class SpinBox extends TkinterWidgetBase{
             from_: min,
             to: max,
             increment: step,
-            value: defaultValue, 
+            value: defaultValue,
             ...this.getConfigCode()
         }
-        
+
         const code = []
         let spinBox =  `${variableName} = tk.Spinbox(master=${parent})`
         if (defaultValue){
@@ -85,10 +85,10 @@ class SpinBox extends TkinterWidgetBase{
         code.push(spinBox)
 
         return [
-               ...code,
-                `${variableName}.config(${convertObjectToKeyValueString(config)})`,
-                `${variableName}.${this.getLayoutCode()}`
-            ]
+            ...code,
+            `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+            `${variableName}.${this.getLayoutCode()}`
+        ]
     }
 
     getToolbarAttrs(){
@@ -109,9 +109,9 @@ class SpinBox extends TkinterWidgetBase{
     renderContent(){
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="tw-p-2 tw-w-full tw-h-full tw-flex tw-place-items-center tw-justify-between" 
-                        ref={this.styleAreaRef}
-                        style={this.getInnerRenderStyling()}>
+                <div className="tw-p-2 tw-w-full tw-h-full tw-flex tw-place-items-center tw-justify-between"
+                     ref={this.styleAreaRef}
+                     style={this.getInnerRenderStyling()}>
                     <div className="tw-text-sm ">
                         {this.getAttrValue("spinProps.default")}
                     </div>

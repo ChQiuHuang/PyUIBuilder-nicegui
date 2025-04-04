@@ -1,11 +1,10 @@
 import { Layouts } from "../../../canvas/constants/layouts"
 import Tools from "../../../canvas/constants/tools"
 import Widget from "../../../canvas/widgets/base"
-import { convertObjectToKeyValueString } from "../../../utils/common"
-import {TkinterBase} from "./base"
+import { NiceGUIBase } from "./base"
 
 
-class Frame extends TkinterBase{
+class Frame extends NiceGUIBase{
 
     static widgetType = "frame"
     static displayName = "Frame"
@@ -35,7 +34,7 @@ class Frame extends TkinterBase{
                             // this.setWidgetInnerStyle("paddingRight", `${value}px`)
 
                             // const widgetStyle = {
-                               
+
                             // }
                             this.setState((prevState) => ({
 
@@ -111,7 +110,7 @@ class Frame extends TkinterBase{
                             this.setAttrValue("margin.marginY", value)
                         }
                     },
-                },  
+                },
             }
         }
 
@@ -133,7 +132,7 @@ class Frame extends TkinterBase{
         const {layout} = this.getParentLayout()
 
         const config = {
-            bg: `"${bg}"` 
+            bg: `"${bg}"`
         }
 
         if (layout !== Layouts.PLACE){
@@ -149,16 +148,17 @@ class Frame extends TkinterBase{
         return config
     }
 
+
     generateCode(variableName, parent){
 
-        const config = convertObjectToKeyValueString(this.getConfigCode())
+        const bg = this.getAttrValue("styling.backgroundColor")
 
         return [
-                `${variableName} = tk.Frame(master=${parent})`,
-                `${variableName}.config(${config})`,
-                `${variableName}.${this.getLayoutCode()}`,
-                ...this.getGridLayoutConfigurationCode(variableName)
-            ]
+            `${variableName} = ctk.CTkFrame(master=${parent})`,
+            `${variableName}.configure(fg_color="${bg}")`,
+            `${variableName}.${this.getLayoutCode()}`,
+            ...this.getGridLayoutConfigurationCode(variableName)
+        ]
     }
 
     getToolbarAttrs(){
@@ -174,7 +174,7 @@ class Frame extends TkinterBase{
             gridConfig,
             gridWeights
         })
-    }    
+    }
 
     renderContent(){
         // console.log("bounding rect: ", this.getBoundingRect())
@@ -182,10 +182,10 @@ class Frame extends TkinterBase{
         // console.log("widget styling: ", this.state.widgetInnerStyling)
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-relative tw-rounded-md tw-overflow-hidden">
-                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start" 
-                    ref={this.styleAreaRef}
-                    style={this.getInnerRenderStyling()}>
-                    {this.renderTkinterLayout()} {/*This is required for pack layouts, so if your widget accepts child widgets, ensure to add this */}
+                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start"
+                     ref={this.styleAreaRef}
+                     style={this.getInnerRenderStyling()}>
+                    {this.renderTkinterLayout()}
                 </div>
             </div>
         )

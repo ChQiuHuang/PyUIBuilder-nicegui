@@ -1,14 +1,13 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { getPythonAssetPath } from "../../utils/pythonFilePath"
-import { TkinterBase } from "./base"
+import { NiceGUIBase } from "./base"
 
 
-class TopLevel extends TkinterBase{
+class TopLevel extends NiceGUIBase{
 
     static widgetType = "toplevel"
     static displayName = "Top Level"
-
 
     constructor(props) {
         super(props)
@@ -27,14 +26,14 @@ class TopLevel extends TkinterBase{
                 title: {
                     label: "Window Title",
                     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
-                    toolProps: {placeholder: "Window title", maxLength: 40}, 
+                    toolProps: {placeholder: "Window title", maxLength: 40},
                     value: "Top level",
                     onChange: (value) => this.setAttrValue("title", value)
                 },
                 logo: {
                     label: "Toplevel Logo",
-                    tool: Tools.UPLOADED_LIST, 
-                    toolProps: {filterOptions: ["image/jpg", "image/jpeg", "image/png"]}, 
+                    tool: Tools.UPLOADED_LIST,
+                    toolProps: {filterOptions: ["image/jpg", "image/jpeg", "image/png"]},
                     value: "",
                     onChange: (value) => this.setAttrValue("logo", value)
                 }
@@ -44,10 +43,9 @@ class TopLevel extends TkinterBase{
     }
 
     componentDidMount(){
-        this.setAttrValue("styling.backgroundColor", "#E4E2E2")
+        this.setAttrValue("styling.backgroundColor", "#23272D")
         super.componentDidMount()
     }
-
 
     generateCode(variableName, parent){
 
@@ -58,8 +56,8 @@ class TopLevel extends TkinterBase{
         const {width, height} = this.getSize()
 
         const code = [
-            `${variableName} = tk.Toplevel(master=${parent})`,
-            `${variableName}.config(bg="${backgroundColor}")`,
+            `${variableName} = ctk.CTkToplevel(master=${parent})`,
+            `${variableName}.configure(fg_color="${backgroundColor}")`,
             `${variableName}.title("${this.getAttrValue("title")}")`,
             `${variableName}.geometry("${width}x${height}")`,
 
@@ -67,7 +65,7 @@ class TopLevel extends TkinterBase{
         ]
 
         if (logo?.name){
-            
+
             // code.push(`\n`)
             code.push(`${variableName}_img = Image.open(${getPythonAssetPath(logo.name, "image")})`)
             code.push(`${variableName}_img = ImageTk.PhotoImage(${variableName}_img)`)
@@ -75,23 +73,23 @@ class TopLevel extends TkinterBase{
             // code.push("\n")
         }
 
-
         return code
     }
 
     getImports(){
         const imports = super.getImports()
-        
+
         if (this.getAttrValue("logo"))
             imports.push("import os", "from PIL import Image, ImageTk", )
 
         return imports
     }
 
+
     getRequirements(){
         const requirements = super.getRequirements()
 
-        
+
         if (this.getAttrValue("logo"))
             requirements.push("pillow")
 
@@ -112,18 +110,10 @@ class TopLevel extends TkinterBase{
     }
 
     renderContent(){
-        const logo = this.getAttrValue("logo")
-
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="tw-flex tw-w-full tw-h-[25px] tw-bg-[#c7c7c7] tw-p-1 tw-gap-1
+                <div className="tw-flex tw-w-full tw-h-[25px] tw-bg-[#c7c7c7] tw-p-1
                                 tw-overflow-hidden tw-shadow-xl tw-place-items-center">
-                    {
-                        logo && (
-                            <img src={logo.previewUrl} alt={logo.name} 
-                                    className="tw-bg-contain tw-w-[15px] tw-h-[15px] tw-rounded-sm" />
-                        )
-                    }
                     <div className="tw-text-sm">{this.getAttrValue("title")}</div>
                     <div className="tw-ml-auto tw-flex tw-gap-1  tw-place-items-center">
                         <div className="tw-bg-yellow-400 tw-rounded-full tw-w-[15px] tw-h-[15px]">
@@ -135,8 +125,8 @@ class TopLevel extends TkinterBase{
                     </div>
                 </div>
                 <div className="tw-p-2 tw-w-full tw-h-full tw-content-start"
-                    ref={this.styleAreaRef}
-                    style={this.state.widgetInnerStyling}>
+                     ref={this.styleAreaRef}
+                     style={this.state.widgetInnerStyling}>
                     {this.renderTkinterLayout()}
                 </div>
             </div>

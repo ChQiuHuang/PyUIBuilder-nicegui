@@ -1,10 +1,10 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { getPythonAssetPath } from "../../utils/pythonFilePath"
-import { NiceGUIBase } from "./base"
+import { CustomTkBase } from "./base"
 
 
-class TopLevel extends NiceGUIBase{
+class TopLevel extends CustomTkBase{
 
     static widgetType = "toplevel"
     static displayName = "Top Level"

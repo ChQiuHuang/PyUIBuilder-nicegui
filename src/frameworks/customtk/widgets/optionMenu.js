@@ -1,10 +1,10 @@
 import Tools from "../../../canvas/constants/tools"
 import {  DownOutlined } from "@ant-design/icons"
-import { NiceGUIWidgetBase} from "./base"
+import { CustomTkWidgetBase} from "./base"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 
 
-class OptionMenu extends NiceGUIWidgetBase{
+class OptionMenu extends CustomTkWidgetBase{
 
     static widgetType = "option_menu"
     static displayName = "Option Menu"

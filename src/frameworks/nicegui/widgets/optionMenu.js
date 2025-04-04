@@ -1,10 +1,10 @@
 import Tools from "../../../canvas/constants/tools"
 import {  DownOutlined } from "@ant-design/icons"
-import { TkinterWidgetBase} from "./base"
-import { convertObjectToKeyValueString } from "../../../utils/common"
+import { NiceGUIWidgetBase} from "./base"
+import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 
 
-class OptionMenu extends TkinterWidgetBase{
+class OptionMenu extends NiceGUIWidgetBase{
 
     static widgetType = "option_menu"
     static displayName = "Option Menu"
@@ -15,7 +15,10 @@ class OptionMenu extends TkinterWidgetBase{
         // const {layout, ...newAttrs} = this.state.attrs // Removes the layout attribute
 
         this.minSize = {width: 50, height: 30}
-                
+
+        let newAttrs = removeKeyFromObject("styling.borderColor", this.state.attrs)
+        newAttrs = removeKeyFromObject("styling.borderWidth", newAttrs)
+
         this.state = {
             ...this.state,
             isDropDownOpen: false,
@@ -23,7 +26,7 @@ class OptionMenu extends TkinterWidgetBase{
             size: { width: 120, height: 30 },
             fitContent: { width: true, height: true },
             attrs: {
-                ...this.state.attrs,
+                ...newAttrs,
                 defaultValue: {
                     label: "Default Value",
                     tool: Tools.INPUT,
@@ -45,32 +48,32 @@ class OptionMenu extends TkinterWidgetBase{
         }
 
     }
-   
+
     componentDidMount(){
         super.componentDidMount()
-        this.setWidgetInnerStyle("backgroundColor", "#E4E2E2")
+        this.setWidgetInnerStyle("backgroundColor", "#fff")
     }
 
     generateCode(variableName, parent){
 
-        
-        const config = convertObjectToKeyValueString(this.getConfigCode())
+
+        const config = this.getConfigCode()
 
         const defaultValue = this.getAttrValue("defaultValue")
         const options = this.getAttrValue("widgetOptions").inputs
 
         const code = [
             `${variableName}_options = ${JSON.stringify(options)}`,
-            `${variableName}_var = tk.StringVar(value="${options.at(1) || defaultValue || ''}")`,
-            `${variableName} = tk.OptionMenu(${parent}, ${variableName}_var, *${variableName}_options)`
+            `${variableName}_var = ctk.StringVar(value="${options.at(1) || defaultValue || ''}")`,
+            `${variableName} = ctk.CTkOptionMenu(${parent}, variable=${variableName}_var, values=${variableName}_options)`
         ]
 
 
         return [
-                ...code,
-                `${variableName}.config(${config})`,
-                `${variableName}.${this.getLayoutCode()}`
-            ]
+            ...code,
+            `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+            `${variableName}.${this.getLayoutCode()}`
+        ]
     }
 
     getToolbarAttrs(){
@@ -78,7 +81,7 @@ class OptionMenu extends TkinterWidgetBase{
         const toolBarAttrs = super.getToolbarAttrs()
 
         const attrs = this.state.attrs
-        
+
         return ({
             id: this.__id,
             widgetName: toolBarAttrs.widgetName,
@@ -100,23 +103,23 @@ class OptionMenu extends TkinterWidgetBase{
 
         return (
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
-                style={this.getInnerRenderStyling()}
-                ref={this.styleAreaRef}
-                onClick={this.toggleDropDownOpen}
-                >
+                 ref={this.styleAreaRef}
+                 style={this.getInnerRenderStyling()}
+                 onClick={this.toggleDropDownOpen}
+            >
                 <div className="tw-flex tw-justify-between tw-gap-1">
                     {this.getAttrValue("defaultValue")}
-                    
+
                     <div className="tw-text-sm">
                         <DownOutlined />
                     </div>
                 </div>
                 {this.state.isDropDownOpen &&
                     <div className="tw-absolute tw-p-1 tw-bg-white tw-rounded-md tw-shadow-md tw-left-0 
-                                    tw-w-full tw-h-fit " 
-                                    style={{top: "calc(100% + 5px)"}}
-                                    >
-                        { 
+                                    tw-w-full tw-h-fit "
+                         style={{top: "calc(100% + 5px)"}}
+                    >
+                        {
                             inputs.map((value, index) => {
                                 return (
                                     <div key={index} className="tw-flex tw-gap-2 tw-w-full tw-h-full tw-place-items-center
@@ -127,11 +130,11 @@ class OptionMenu extends TkinterWidgetBase{
                                         </span>
                                     </div>
                                 )
-                            })  
+                            })
                         }
                     </div>
                 }
-                
+
             </div>
         )
     }

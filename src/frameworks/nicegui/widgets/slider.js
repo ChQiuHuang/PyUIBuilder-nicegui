@@ -1,17 +1,20 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
-import {TkinterBase, TkinterWidgetBase} from "./base"
+import { NiceGUIWidgetBase } from "./base"
 
 
-class Slider extends TkinterWidgetBase{
+class Slider extends NiceGUIWidgetBase{
 
     static widgetType = "scale"
     static displayName = "Scale"
 
-    // FIXME: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use 
+    // FIXME: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use
     constructor(props) {
         super(props)
+
+        let newAttrs = removeKeyFromObject("styling.foregroundColor", this.state.attrs)
+
 
         this.state = {
             ...this.state,
@@ -19,17 +22,17 @@ class Slider extends TkinterWidgetBase{
             size: { width: 120, height: 10 },
             fitContent: {width: true, height: true},
             attrs: {
-                ...this.state.attrs,
+                ...newAttrs,
                 styling: {
-                    ...this.state.attrs.styling,
+                    ...newAttrs.styling,
                     // TODO: trough color
-                    troughColor: {
-                        label: "Trough Color",
-                        tool: Tools.COLOR_PICKER, 
-                        value: "#fff",
+                    progressColor: {
+                        label: "Progress Color",
+                        tool: Tools.COLOR_PICKER,
+                        value: "#029CFF",
                         onChange: (value) => {
                             // this.setWidgetInnerStyle("color", value)
-                            this.setAttrValue("styling.troughColor", value)
+                            this.setAttrValue("styling.progressColor", value)
                         }
                     }
                 },
@@ -67,7 +70,7 @@ class Slider extends TkinterWidgetBase{
                 },
                 orientation: {
                     label: "Orientation",
-                    tool: Tools.SELECT_DROPDOWN, 
+                    tool: Tools.SELECT_DROPDOWN,
                     toolProps: {placeholder: "select orientation"},
                     value: "",
                     options: [{value: "horizontal", label: "horizontal"}, {value: "vertical", label: "vertical"}],
@@ -98,12 +101,14 @@ class Slider extends TkinterWidgetBase{
 
     generateCode(variableName, parent){
         // TODO: add orientation
-        
+
         const config = this.getConfigCode()
 
         config["from_"] = this.getAttrValue("scale.min")
         config["to"] = this.getAttrValue("scale.max")
-        config["resolution"] = this.getAttrValue("scale.step")
+        config["number_of_steps"] = this.getAttrValue("scale.step")
+
+        config["progress_color"] = `"${this.getAttrValue("styling.progressColor")}"`
 
         if (this.getAttrValue("orientation")){
             config["orientation"] = this.getAttrValue("orientation")
@@ -112,11 +117,11 @@ class Slider extends TkinterWidgetBase{
         const defaultValue = this.getAttrValue("scale.default")
 
         return [
-                `${variableName}_var = tk.DoubleVar(value=${defaultValue})`,
-                `${variableName} = tk.Scale(master=${parent}, variable=${variableName}_var)`,
-                `${variableName}.config(${convertObjectToKeyValueString(config)})`,
-                `${variableName}.${this.getLayoutCode()}`
-            ]
+            `${variableName}_var = ctk.DoubleVar(value=${defaultValue})`,
+            `${variableName} = ctk.CTkSlider(master=${parent}, variable=${variableName}_var)`,
+            `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+            `${variableName}.${this.getLayoutCode()}`
+        ]
     }
 
     getToolbarAttrs(){
@@ -137,10 +142,10 @@ class Slider extends TkinterWidgetBase{
     renderContent(){
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="flex flex-col items-center justify-center h-screen 
-                                bg-gray-100" 
-                                ref={this.styleAreaRef}
-                                style={this.getInnerRenderStyling()}>
+                <div className="flex flex-col items-center justify-center h-screen
+                                bg-gray-100"
+                     ref={this.styleAreaRef}
+                     style={this.getInnerRenderStyling()}>
                     <div className="w-full max-w-md">
                         <input
                             type="range"
@@ -151,7 +156,7 @@ class Slider extends TkinterWidgetBase{
                             style={{backgroundColor: this.getAttrValue("styling.troughColor") }}
                             className="tw-pointer-events-none w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
                         />
-                       
+
                     </div>
                 </div>
             </div>

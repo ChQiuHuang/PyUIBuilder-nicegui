@@ -1,10 +1,10 @@
 import { Layouts } from "../../../canvas/constants/layouts"
 import Tools from "../../../canvas/constants/tools"
 import Widget from "../../../canvas/widgets/base"
-import { NiceGUIBase } from "./base"
+import { CustomTkBase } from "./base"
 
 
-class Frame extends NiceGUIBase{
+class Frame extends CustomTkBase{
 
     static widgetType = "frame"
     static displayName = "Frame"

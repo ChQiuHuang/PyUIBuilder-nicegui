@@ -2,10 +2,10 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { CheckSquareFilled } from "@ant-design/icons"
-import { NiceGUIWidgetBase } from "./base"
+import { CustomTkWidgetBase } from "./base"
 
 
-export class CheckBox extends NiceGUIWidgetBase{
+export class CheckBox extends CustomTkWidgetBase{
 
     static widgetType = "check_button"
     static displayName = "Check Box"
@@ -40,7 +40,7 @@ export class CheckBox extends NiceGUIWidgetBase{
                 checkLabel: {
                     label: "Check Label",
                     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
-                    toolProps: {placeholder: "Button label", maxLength: 100}, 
+                    toolProps: {placeholder: "Button label", maxLength: 100},
                     value: "Checkbox",
                     onChange: (value) => this.setAttrValue("checkLabel", value)
                 },
@@ -70,13 +70,13 @@ export class CheckBox extends NiceGUIWidgetBase{
                 `${variableName} = ctk.CTkCheckBox(master=${parent}, text="${labelText}")`,
                 `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
             ]
-        
+
         if (this.getAttrValue("defaultChecked")){
             code.push(`${variableName}.select()`)
         }
-        
+
         code.push(`${variableName}.${this.getLayoutCode()}`)
-        
+
         return code
     }
 
@@ -99,10 +99,10 @@ export class CheckBox extends NiceGUIWidgetBase{
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
                 style={this.getInnerRenderStyling()}
                 >
-                
+
                 <div className="tw-flex tw-gap-2 tw-w-full tw-h-full tw-place-items-center tw-place-content-center">
                     <div className="tw-border-solid tw-border-[#D9D9D9] tw-border-2
-                                    tw-min-w-[20px] tw-min-h-[20px] tw-w-[20px] tw-h-[20px] 
+                                    tw-min-w-[20px] tw-min-h-[20px] tw-w-[20px] tw-h-[20px]
                                     tw-text-blue-600 tw-flex tw-items-center tw-justify-center
                                     tw-rounded-md tw-overflow-hidden">
                         {
@@ -114,7 +114,7 @@ export class CheckBox extends NiceGUIWidgetBase{
 
                     {this.getAttrValue("checkLabel")}
                 </div>
-              
+
             </div>
         )
     }
@@ -122,7 +122,7 @@ export class CheckBox extends NiceGUIWidgetBase{
 }
 
 
-export class RadioButton extends NiceGUIWidgetBase{
+export class RadioButton extends CustomTkWidgetBase{
     // FIXME: the radio buttons are not visible because of the default heigh provided
 
     static widgetType = "radio_button"

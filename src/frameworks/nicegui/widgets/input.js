@@ -1,13 +1,13 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString } from "../../../utils/common"
-import { TkinterWidgetBase } from "./base"
+import { NiceGUIWidgetBase } from "./base"
 
 
-export class Input extends TkinterWidgetBase{
+export class Input extends NiceGUIWidgetBase{
 
     static widgetType = "entry"
     static displayName = "Entry"
-    
+
     constructor(props) {
         super(props)
 
@@ -20,7 +20,7 @@ export class Input extends TkinterWidgetBase{
                 placeHolder: {
                     label: "PlaceHolder",
                     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
-                    toolProps: {placeholder: "text", maxLength: 100}, 
+                    toolProps: {placeholder: "text", maxLength: 100},
                     value: "placeholder text",
                     onChange: (value) => this.setAttrValue("placeHolder", value)
                 }
@@ -37,14 +37,14 @@ export class Input extends TkinterWidgetBase{
     generateCode(variableName, parent){
 
         const placeHolderText = this.getAttrValue("placeHolder")
-        
+
         const config = convertObjectToKeyValueString(this.getConfigCode())
 
         return [
-                `${variableName} = tk.Entry(master=${parent})`,
-                `${variableName}.config(${config})`,
-                `${variableName}.${this.getLayoutCode()}`
-            ]
+            `${variableName} = ctk.CTkEntry(master=${parent}, placeholder_text="${placeHolderText}")`,
+            `${variableName}.configure(${config})`,
+            `${variableName}.${this.getLayoutCode()}`
+        ]
     }
 
     getToolbarAttrs(){
@@ -65,9 +65,9 @@ export class Input extends TkinterWidgetBase{
     renderContent(){
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="tw-p-2 tw-w-full tw-h-full tw-flex tw-place-items-center" 
-                        ref={this.styleAreaRef}
-                        style={this.getInnerRenderStyling()}>
+                <div className="tw-p-2 tw-w-full tw-h-full tw-flex tw-place-items-center"
+                     ref={this.styleAreaRef}
+                     style={this.getInnerRenderStyling()}>
                     <div className="tw-text-sm tw-text-gray-300">
                         {this.getAttrValue("placeHolder")}
                     </div>
@@ -79,7 +79,7 @@ export class Input extends TkinterWidgetBase{
 }
 
 
-export class Text extends TkinterWidgetBase{
+export class Text extends NiceGUIWidgetBase{
 
     static widgetType = "Text"
 
@@ -94,7 +94,7 @@ export class Text extends TkinterWidgetBase{
                 // placeHolder: {
                 //     label: "PlaceHolder",
                 //     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
-                //     toolProps: {placeholder: "text", maxLength: 100}, 
+                //     toolProps: {placeholder: "text", maxLength: 100},
                 //     value: "placeholder text",
                 //     onChange: (value) => this.setAttrValue("placeHolder", value)
                 // }
@@ -112,14 +112,14 @@ export class Text extends TkinterWidgetBase{
     generateCode(variableName, parent){
 
         const placeHolderText = this.getAttrValue("placeHolder")
-        
+
         const config = convertObjectToKeyValueString(this.getConfigCode())
 
         return [
-                `${variableName} = tk.Text(master=${parent})`,
-                `${variableName}.config(${config})`,
-                `${variableName}.${this.getLayoutCode()}`
-            ]
+            `${variableName} = ctk.CTkTextbox(master=${parent})`,
+            `${variableName}.configure(${config})`,
+            `${variableName}.${this.getLayoutCode()}`
+        ]
     }
 
     getToolbarAttrs(){
@@ -139,9 +139,8 @@ export class Text extends TkinterWidgetBase{
     renderContent(){
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start " 
-                        ref={this.styleAreaRef}
-                        style={this.getInnerRenderStyling()}>
+                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start "
+                     style={this.getInnerRenderStyling()}>
                     <div className="tw-text-sm tw-text-gray-300">
                         {this.getAttrValue("placeHolder")}
                     </div>

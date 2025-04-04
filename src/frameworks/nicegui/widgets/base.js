@@ -1,26 +1,25 @@
-import lo from 'lodash'
-
 import { Layouts, PosType } from "../../../canvas/constants/layouts"
 import Tools from "../../../canvas/constants/tools"
 import Widget from "../../../canvas/widgets/base"
 import { DynamicGridWeightInput } from "../../../components/inputs"
-import { convertObjectToKeyValueString, isNumeric, removeKeyFromObject } from "../../../utils/common"
-import { randomArrayChoice } from "../../../utils/random"
-import { NiceGUI_TO_WEB_CURSOR_MAPPING } from "../constants/cursor"
-import { NiceGUI_To_GFonts } from "../constants/fontFamily"
+import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
+import { Tkinter_TO_WEB_CURSOR_MAPPING } from "../constants/cursor"
+import { Tkinter_To_GFonts } from "../constants/fontFamily"
 import { ANCHOR, GRID_STICKY, JUSTIFY, RELIEF } from "../constants/styling"
 
 
-// FIXME: grid sticky may clash with flex sticky when changing layout, check it once
+
 export class NiceGUIBase extends Widget {
 
-    static requiredImports = ['import NiceGUI as tk']
+    static requiredImports = ['import customtkinter as ctk']
+
+    static requirements = ['customtkinter']
 
     constructor(props) {
         super(props)
 
         this.getLayoutCode = this.getLayoutCode.bind(this)
-        
+
         this.state = {
             ...this.state,
             packAttrs: { // This is required as during flex layout change remount happens and the state updates my not function as expected
@@ -29,21 +28,21 @@ export class NiceGUIBase extends Widget {
             }
         }
 
-        this.renderNiceGUILayout = this.renderNiceGUILayout.bind(this) // this must be called if droppableTags is not set to null
+        this.renderTkinterLayout = this.renderTkinterLayout.bind(this) // this must be called if droppableTags is not set to null
 
         const originalRenderContent = this.renderContent.bind(this);
         this.renderContent = () => {
-            this._calledRenderNiceGUILayout = false
+            this._calledRenderTkinterLayout = false
 
             const content = originalRenderContent()
 
             if (
                 this.droppableTags !== null &&
                 this.droppableTags !== undefined &&
-                !this._calledRenderNiceGUILayout
+                !this._calledRenderTkinterLayout
             ) {
                 throw new Error(
-                `class ${this.constructor.name}: renderNiceGUILayout() must be called inside renderContent() when droppableTags is not null`
+                    `class ${this.constructor.name}: renderTkinterLayout() must be called inside renderContent() when droppableTags is not null`
                 )
             }
 
@@ -51,12 +50,12 @@ export class NiceGUIBase extends Widget {
         }
     }
 
- 
+
     getLayoutCode(){
         const {layout: parentLayout, direction, gap, align="start"} = this.getParentLayout()
 
 
-        const absolutePositioning = this.getAttrValue("positioning")  
+        const absolutePositioning = this.getAttrValue("positioning")
 
         let layoutManager = `pack()`
         const marginX = this.getAttrValue("margin.marginX")
@@ -64,7 +63,7 @@ export class NiceGUIBase extends Widget {
 
         const paddingX = this.getAttrValue("padding.padX")
         const paddingY = this.getAttrValue("padding.padY")
-        
+
         let config = {}
 
         if (marginX){
@@ -84,6 +83,7 @@ export class NiceGUIBase extends Widget {
         }
 
         if (parentLayout === Layouts.PLACE || absolutePositioning){
+
 
             config['x'] = Math.trunc(this.state.pos.x)
             config['y'] = Math.trunc(this.state.pos.y)
@@ -106,20 +106,22 @@ export class NiceGUIBase extends Widget {
 
             const packSide = this.getAttrValue("flexManager.side")
 
+            const config = {}
+
             if (packSide === "" || packSide === "top"){
-                
-                config['side'] = `tk.TOP`
-            
+
+                config['side'] = `ctk.TOP`
+
             }else if (packSide === "left"){
-                
-                config['side'] = `tk.LEFT`
-    
+
+                config['side'] = `ctk.LEFT`
+
             }else if (packSide === "right"){
 
-                config['side'] = `tk.RIGHT`
+                config['side'] = `ctk.RIGHT`
 
             }else{
-                config['side'] = `tk.BOTTOM`
+                config['side'] = `ctk.BOTTOM`
             }
 
             // if (gap > 0){
@@ -127,7 +129,7 @@ export class NiceGUIBase extends Widget {
             //     config["pady"] = gap
             // }
 
-            
+
             // if (align === "start"){
             //     config["anchor"] = "'nw'"
             // }else if (align === "center"){
@@ -166,8 +168,8 @@ export class NiceGUIBase extends Widget {
 
             const sticky = this.getAttrValue("gridManager.sticky")
 
-            config['row'] = row - 1 // unlike css grid NiceGUI grid starts from 0
-            config['column'] = column - 1 // unlike css grid NiceGUI grid starts from 0 
+            config['row'] = row - 1
+            config['column'] = column - 1
 
             if (rowSpan > 1){
                 config['rowspan'] = rowSpan
@@ -181,7 +183,7 @@ export class NiceGUIBase extends Widget {
                 config['sticky'] = `"${sticky}"`
             }
 
-            layoutManager = `grid(${convertObjectToKeyValueString(config)})` 
+            layoutManager = `grid(${convertObjectToKeyValueString(config)})`
         }
 
         return layoutManager
@@ -201,17 +203,17 @@ export class NiceGUIBase extends Widget {
 
             if (rowWeights){
                 const correctedRowWeight = Object.fromEntries(
-                    Object.entries(rowWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) // NiceGUI grid starts from 0 unlike css grid
+                    Object.entries(rowWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) // tkinter grid starts from 0 unlike css grid
                 );// converts the format : {index: {gridNo, weight}} to {gridNo: weight}
 
                 const groupByWeight = Object.entries(correctedRowWeight).reduce((acc, [gridNo, weight]) => {
-                                                if (!acc[weight]) 
-                                                    acc[weight] = []; // Initialize array if it doesn't exist
-                                                
-                                                acc[weight].push(Number(gridNo)); // Convert key to number and add it to the array
-                                                return acc;
-                                        }, {})
-            
+                    if (!acc[weight])
+                        acc[weight] = []; // Initialize array if it doesn't exist
+
+                    acc[weight].push(Number(gridNo)); // Convert key to number and add it to the array
+                    return acc;
+                }, {})
+
                 Object.entries(groupByWeight).forEach(([weight, indices]) => {
                     rowConfigure.push(`${variableName}.grid_rowconfigure(index=[${indices.join(",")}], weight=${weight})`)
                 })
@@ -219,22 +221,22 @@ export class NiceGUIBase extends Widget {
 
             if (colWeights){
                 const correctedColWeight = Object.fromEntries(
-                    Object.entries(colWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) //  NiceGUI grid starts from 0, so -1
+                    Object.entries(colWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) //  tkinter grid starts from 0, so -1
                 ) // converts the format : {index: {gridNo, weight}} to {gridNo: weight}
 
                 const groupByWeight = Object.entries(correctedColWeight).reduce((acc, [gridNo, weight]) => {
-                                                if (!acc[weight]) 
-                                                    acc[weight] = [] // Initialize array if it doesn't exist
-                                                
-                                                acc[weight].push(Number(gridNo)) // Convert key to number and add it to the array
-                                                return acc
-                                        }, {})
-            
+                    if (!acc[weight])
+                        acc[weight] = [] // Initialize array if it doesn't exist
+
+                    acc[weight].push(Number(gridNo)) // Convert key to number and add it to the array
+                    return acc
+                }, {})
+
                 Object.entries(groupByWeight).forEach(([weight, indices]) => {
                     columnConfigure.push(`${variableName}.grid_columnconfigure(index=[${indices.join(",")}], weight=${weight})`)
                 })
             }
-            
+
         }
 
         return [...rowConfigure, ...columnConfigure]
@@ -250,14 +252,14 @@ export class NiceGUIBase extends Widget {
     }
 
     /**
-     * A simple function that returns a mapping for grid sticky NiceGUI
+     * A simple function that returns a mapping for grid sticky tkinter
      */
     getGridStickyStyling(sticky){
 
         const styleMapping = {
-            [GRID_STICKY.N]: { alignSelf: "start", justifySelf: "center" }, 
-            [GRID_STICKY.S]: { alignSelf: "end", justifySelf: "center" },   
-            [GRID_STICKY.E]: {  alignSelf: "center", justifySelf: "end" }, 
+            [GRID_STICKY.N]: { alignSelf: "start", justifySelf: "center" },
+            [GRID_STICKY.S]: { alignSelf: "end", justifySelf: "center" },
+            [GRID_STICKY.E]: {  alignSelf: "center", justifySelf: "end" },
             [GRID_STICKY.W]: {  alignSelf: "center", justifySelf: "start" },
             [GRID_STICKY.NS]: { alignSelf: "stretch", justifySelf: "center" }, // Stretch vertically
             [GRID_STICKY.EW]: { alignSelf: "center", justifySelf: "stretch"  }, // Stretch horizontally
@@ -276,13 +278,13 @@ export class NiceGUIBase extends Widget {
 
         if (!layout){
             return {}
-        } 
+        }
         let updates = super.setParentLayout(layout)
 
         const {layout: parentLayout, direction, gap} = layout
 
         // show attributes related to the layout manager
-        // remove gridManager, flexManager positioning 
+        // remove gridManager, flexManager positioning
         const {gridManager, flexManager, positioning, ...restAttrs} =  this.state.attrs
 
         if (parentLayout === Layouts.FLEX || parentLayout === Layouts.GRID) {
@@ -301,11 +303,11 @@ export class NiceGUIBase extends Widget {
                     value: false,
                     onChange: (value) => {
                         this.setAttrValue("positioning", value)
-                        
+
                         this.updateState({
                             positionType: value ? PosType.ABSOLUTE : PosType.NONE,
                         })
-                        
+
                     }
                 }
             }
@@ -331,7 +333,7 @@ export class NiceGUIBase extends Widget {
                                             width: "100%"
                                         }
                                     }))
-                                    
+
                                 }
                             },
                             fillY: {
@@ -340,7 +342,7 @@ export class NiceGUIBase extends Widget {
                                 value: false,
                                 onChange: (value) => {
                                     this.setAttrValue("flexManager.fillY", value)
-                                    
+
                                     this.updateState((prevState) => ({
                                         widgetOuterStyling: {
                                             ...prevState.widgetOuterStyling,
@@ -357,16 +359,16 @@ export class NiceGUIBase extends Widget {
                                 onChange: (value) => {
                                     this.setAttrValue("flexManager.side", value, () => {
                                         this.updateState((prevState) => ({packAttrs: {...prevState.packAttrs, side: value}}), () => {
-                                           
+
                                             // this.props.parentWidgetRef.current.forceRerender()
                                             this.props.requestWidgetDataUpdate(this.props.parentWidgetRef.current.__id)
                                             this.stateChangeSubscriberCallback() // call this to notify the toolbar that the widget has changed state
                                         })
-                                      
+
 
                                     })
 
-                                    
+
                                     // console.log("updateing state: ", value, this.props.parentWidgetRef.current)
                                 }
                             },
@@ -376,7 +378,7 @@ export class NiceGUIBase extends Widget {
                                 value: false,
                                 onChange: (value) => {
                                     this.setAttrValue("flexManager.expand", value)
-                                  
+
                                     // this.setWidgetOuterStyle(value ? 1 : 0)
                                 }
                             },
@@ -388,18 +390,18 @@ export class NiceGUIBase extends Widget {
                                 onChange: (value) => {
                                     this.setAttrValue("flexManager.anchor", value, () => {
                                         // this.props.parentWidgetRef.current.forceRerender()
-                                    })   
+                                    })
                                     this.updateState((prevState) => ({packAttrs: {...prevState.packAttrs, anchor: value}}), () => {
-                                          
+
                                         // this.props.requestWidgetDataUpdate(this.props.parentWidgetRef.current.__id)
-                                        
+
                                         // this.props.requestWidgetDataUpdate(this.__id)
                                         // this.stateChangeSubscriberCallback() // call this to notify the toolbar that the widget has changed state
                                         // this.props.parentWidgetRef.current.forceRerender()
                                     })
                                 }
                             },
-                            
+
                         }
                     }
                 }
@@ -416,14 +418,14 @@ export class NiceGUIBase extends Widget {
                             display: "horizontal",
                             row: {
                                 label: "Row",
-                                tool: Tools.NUMBER_INPUT, 
+                                tool: Tools.NUMBER_INPUT,
                                 toolProps: { placeholder: "row", max: 1000, min: 1 },
                                 value: 0,
                                 onChange: (value) => {
-                                    
+
                                     const previousRow = this.getWidgetOuterStyle("gridRow") || "1 / span 1"
                                     let [_row=1, rowSpan=1] = previousRow.replace(/\s+/g, '').split("/span").map(Number)
-                                    
+
                                     this.setAttrValue("gridManager.row", value)
                                     this.setWidgetOuterStyle("gridRow", `${value+' / span '+rowSpan}`)
                                 }
@@ -434,19 +436,19 @@ export class NiceGUIBase extends Widget {
                                 toolProps: { placeholder: "row span", max: 1000, min: 1 },
                                 value: 1,
                                 onChange: (value) => {
-                                    
+
                                     const previousRow = this.getWidgetOuterStyle("gridRow") || "1 / span 1"
-                                    
+
                                     // const [row=1, _rowSpan=1] = previousRow.replace(/\s+/g, '').split("/").map(Number)
                                     const [row=1, rowSpan=1] = previousRow.replace(/\s+/g, '').split("/span").map(Number)
-                                    
+
                                     // if (value < row){
                                     //     value = row + 1
                                     // }
                                     if (value < 1){
                                         value = 1
                                     }
-                                    
+
                                     this.setAttrValue("gridManager.rowSpan", value)
                                     this.setWidgetOuterStyle("gridRow", `${(row || 1) + ' / span ' +value}`)
                                 }
@@ -457,7 +459,7 @@ export class NiceGUIBase extends Widget {
                                 toolProps: { placeholder: "column", max: 1000, min: 1 },
                                 value: 0,
                                 onChange: (value) => {
-                                    
+
                                     const previousRow = this.getWidgetOuterStyle("gridColumn") || "1 / span 1"
 
                                     let [_col=1, colSpan=1] = previousRow.replace(/\s+/g, '').split("/span").map(Number)
@@ -478,7 +480,7 @@ export class NiceGUIBase extends Widget {
                                 toolProps: { placeholder: "column span", max: 1000, min: 1 },
                                 value: 1,
                                 onChange: (value) => {
-                            
+
                                     const previousCol = this.getWidgetOuterStyle("gridColumn") || "1 / span 1"
 
                                     const [col=1, _colSpan=1] = previousCol.replace(/\s+/g, '').split("/span").map(Number)
@@ -487,7 +489,7 @@ export class NiceGUIBase extends Widget {
                                     if (value < 1){
                                         value = 1
                                     }
-                                    
+
                                     this.setAttrValue("gridManager.columnSpan", value)
                                     this.setWidgetOuterStyle("gridColumn", `${(col || 1) + ' / span ' + value}`)
                                 }
@@ -499,20 +501,20 @@ export class NiceGUIBase extends Widget {
                                 options: Object.values(GRID_STICKY).map((val) => ({value: val, label: val})),
                                 value: GRID_STICKY.NONE,
                                 onChange: (value) => {
-                            
+
                                     this.setAttrValue("gridManager.sticky", value)
-                                    
-                                    
+
+
                                     this.updateState((prev) => {
-                                        
+
                                         const { alignSelf, justifySelf, placeSelf, ...restStates } = prev.widgetOuterStyling; // Remove these properties
 
                                         return ({
-                                                    widgetOuterStyling: {
-                                                        ...restStates,   
-                                                        ...this.getGridStickyStyling(value)
-                                                    }
-                                                })
+                                            widgetOuterStyling: {
+                                                ...restStates,
+                                                ...this.getGridStickyStyling(value)
+                                            }
+                                        })
                                     })
 
                                     // this.setW
@@ -539,25 +541,24 @@ export class NiceGUIBase extends Widget {
         return updates
     }
 
-      
+
 
     /**
-     * adds the layout to achieve the pack from NiceGUI refer: https://www.youtube.com/watch?v=rbW1iJO1psk
-     * @param {*} widgets 
-     * @param {*} index 
-     * @returns 
+     * adds the layout to achieve the pack from tkinter refer: https://www.youtube.com/watch?v=rbW1iJO1psk
+     * @param {*} widgets
+     * @param {*} index
+     * @returns
      */
     renderPackWidgetsRecursively = (widgets, index = 0, lastSide = "", previousExpandValue = 0) => {
         if (index >= widgets.length) return null;
-    
+
         const widget = widgets[index];
         const widgetRef = widget.ref?.current;
         if (!widgetRef) return null; // Ensure ref exists before accessing
-    
-        const { side = "top", expand = false, anchor } = widgetRef.getPackAttrs() || {};
-    
-        // console.log("rerendering:", side, expand);
 
+        const { side = "top", expand = false, anchor } = widgetRef.getPackAttrs() || {};
+
+        // console.log("rerendering:", side, expand);
 
         const directionMap = {
             top: "column",
@@ -565,33 +566,23 @@ export class NiceGUIBase extends Widget {
             left: "row",
             right: "row-reverse",
         }
-    
+
         const currentWidgetDirection = directionMap[side] || "column"; // Default to "column"
+        const isSameSide = lastSide === side;
         const isVertical = ["top", "bottom"].includes(side);
-        
-        const isSameSide = lastSide === side
-        const isOppositeSide = ((lastSide === "top" && side === "bottom") || (lastSide === "left" && side === "right"))
 
-        const isDiagonal = (!isSameSide && !isOppositeSide && lastSide !== "") // bottom and right, top and left
+        let expandValue = expand ? (isSameSide ? previousExpandValue : widgets.length - index) : 1;
 
-        let expandValue = expand ? ((isSameSide || isOppositeSide) ? previousExpandValue : (widgets.length - index) + 1) : (previousExpandValue > 0) ? 0 : 1
-        
         if (expand && expandValue === 0){
             expandValue = 1 // if there is expand it should expand
         }
 
-        if (expand && isDiagonal){
-            expandValue = 1
-        }
-        
-        // TODO: if the child widget as fillx or y use flex grow
-
         if ((expand && !isSameSide) || (expand && previousExpandValue === 0)){
-             previousExpandValue = expandValue;
+            previousExpandValue = expandValue;
         }
 
         lastSide = side; // Update last side for recursion
-        
+
         const anchorStyles = {
             n: { alignItems: "flex-start", justifyContent: "center" }, // Top-center
             s: { alignItems: "flex-end", justifyContent: "center" },   // Bottom-center
@@ -607,9 +598,6 @@ export class NiceGUIBase extends Widget {
 
 
         const stretchClass = isVertical ? "tw-flex-grow" : "tw-h-full"; // Allow only horizontal growth for top/bottom
-        // TODO: if previous expand value is greater than 0 and current doesn't have expand then it should be 0
-
-        // const fill = this.getAttrValue("flexManager.fillX") || this.getAttrValue("flexManager.fillY")
 
         if (isSameSide) {
             return (
@@ -630,21 +618,20 @@ export class NiceGUIBase extends Widget {
                     >
                         {widget}
                     </div>
-    
+
                     {this.renderPackWidgetsRecursively(widgets, index + 1, side, previousExpandValue)}
                 </>
             );
         }
-    
+
         return (
             <div
                 data-pack-container={side}
-                className={`tw-flex tw-flex-auto`} 
-                // className={`tw-flex ${isVertical ? "!tw-h-full" : "!tw-w-full"}`} 
+                className={`tw-flex ${isVertical ? "!tw-h-full" : "!tw-w-full"}`}
                 style={{
                     display: "flex",
                     flexDirection: currentWidgetDirection,
-                    flexGrow: expandValue, //((widgets.length - 1) === index) ? 1 : 0, // last index will always have flex-grow 1
+                    flexGrow: expand ? expandValue : 1, //((widgets.length - 1) === index) ? 1 : 0, // last index will always have flex-grow 1
                     flexShrink: expand ? 0 : 1,
                     flexBasis: "auto",
                     minWidth: isVertical ? "0" : "auto",
@@ -668,20 +655,20 @@ export class NiceGUIBase extends Widget {
                 >
                     {widget}
                 </div>
-    
+
                 {this.renderPackWidgetsRecursively(widgets, index + 1, side, previousExpandValue)}
             </div>
         );
     }
-    
-      
+
+
 
     /**
-     * 
+     *
      * Helps with pack layout manager and grid manager
      */
-    renderNiceGUILayout(){
-        this._calledRenderNiceGUILayout = true // NOTE: this is set so subclass are forced to call this method if droppable tags are not null
+    renderTkinterLayout(){
+        this._calledRenderTkinterLayout = true // NOTE: this is set so subclass are forced to call this method if droppable tags are not null
         const {layout, direction, gap} = this.getLayout()
 
         if (layout === Layouts.FLEX){
@@ -702,11 +689,12 @@ export class NiceGUIBase extends Widget {
 
         const gridRow = this.getAttrValue("gridConfig.noOfRows") || 3 // suppose its loaded using this.load, we need this
         const gridCol = this.getAttrValue("gridConfig.noOfCols") || 3
-        
+
         if (layout === Layouts.GRID){
 
             const rowWeight = this.getAttrValue("gridWeights.rowWeights") || undefined // suppose its loaded via this.load
             const colWeight = this.getAttrValue("gridWeights.colWeights") || undefined // suppose its loaded via this.load
+
 
             const {...restAttrs} =  this.state.attrs
 
@@ -718,13 +706,13 @@ export class NiceGUIBase extends Widget {
                         display: "horizontal",
                         noOfRows: {
                             label: "No of rows",
-                            tool: Tools.NUMBER_INPUT, 
+                            tool: Tools.NUMBER_INPUT,
                             toolProps: { placeholder: "no of rows", max: 1000, min: 1 },
                             value: gridRow,
                             onChange: (value) => {
                                 this.setAttrValue("gridConfig.noOfRows", value)
 
-                                const gridWeights = this.getAttrValue("gridConfig.rowWeights") 
+                                const gridWeights = this.getAttrValue("gridConfig.rowWeights")
 
                                 let gridTemplateRows = `repeat(${value}, max-content)`
 
@@ -737,14 +725,14 @@ export class NiceGUIBase extends Widget {
                                 this.updateState((prev) => ({
                                     widgetInnerStyling: {
                                         ...prev.widgetInnerStyling,
-                                    gridTemplateRows: gridTemplateRows
+                                        gridTemplateRows: gridTemplateRows
                                     }
                                 }))
                             }
                         },
                         noOfCols: {
                             label: "No of cols",
-                            tool: Tools.NUMBER_INPUT, 
+                            tool: Tools.NUMBER_INPUT,
                             toolProps: { placeholder: "no of cols", max: 1000, min: 1 },
                             value: gridCol,
                             onChange: (value) => {
@@ -757,8 +745,8 @@ export class NiceGUIBase extends Widget {
                                     }
                                 }))
                             }
-                        },    
-                        
+                        },
+
                     },
                     gridWeights: {
                         label: "Grid weights",
@@ -766,19 +754,19 @@ export class NiceGUIBase extends Widget {
                         rowWeights: {
                             label: "Row weights",
                             tool: Tools.CUSTOM,
-                            toolProps: { 
-                                        // placeholder: "weight", 
-                                        // defaultWeightMapping: this.getAttrValue("gridWeights.rowWeights"),
-                                     },
+                            toolProps: {
+                                // placeholder: "weight",
+                                // defaultWeightMapping: this.getAttrValue("gridWeights.rowWeights"),
+                            },
                             value: rowWeight,
-                            Component: DynamicGridWeightInput, 
+                            Component: DynamicGridWeightInput,
                             onChange: (value) => {
 
                                 if (!value) return
 
 
                                 this.setAttrValue("gridWeights.rowWeights", value)
-                                
+
                                 const noOfRows = this.getAttrValue("gridConfig.noOfRows")
 
 
@@ -794,18 +782,18 @@ export class NiceGUIBase extends Widget {
                         colWeights: {
                             label: "Column weights",
                             tool: Tools.CUSTOM,
-                            toolProps: { 
-                                        // placeholder: "weight", 
-                                        // defaultWeightMapping: {0: {weight: 0, gridNo: 0}}
-                                     },
+                            toolProps: {
+                                // placeholder: "weight",
+                                // defaultWeightMapping: {0: {weight: 0, gridNo: 0}}
+                            },
                             value: colWeight,
-                            Component: DynamicGridWeightInput, 
+                            Component: DynamicGridWeightInput,
                             onChange: (value) => {
 
                                 if (!value) return
 
                                 this.setAttrValue("gridWeights.colWeights", value)
-                                
+
                                 const noOfCols = this.getAttrValue("gridConfig.noOfCols")
 
 
@@ -821,14 +809,14 @@ export class NiceGUIBase extends Widget {
                             }
                         }
                     }
-                    
+
                 }
             }
             this.updateState((prevState) => ({...prevState, ...updates}))
 
         }else if (layout === Layouts.FLEX){
             const {gridConfig, gridWeights, ...restAttrs} =  this.state.attrs
-            
+
             this.updateState((prevState) => ({attrs: {...restAttrs}}))
         }
 
@@ -842,27 +830,27 @@ export class NiceGUIBase extends Widget {
                 flexDirection: "column",
                 // flexDirection: direction,
                 gap: `${gap}px`,
-                gridTemplateColumns: `repeat(${gridRow}, max-content)`,
-                gridTemplateRows: `repeat(${gridCol}, max-content)`,
+                gridTemplateColumns: "repeat(3, max-content)",
+                gridTemplateRows: "repeat(3, max-content)",
                 // gridTemplateColumns: "repeat(auto-fill, minmax(100px, auto))",
-                // gridTemplateRows: "repeat(auto-fill, minmax(100px, auto))",  
+                // gridTemplateRows: "repeat(auto-fill, minmax(100px, auto))",
             }
         }))
 
-        
+
     }
 
     getInnerRenderStyling(){
         let {width, height, minWidth, minHeight} = this.getRenderSize()
-        
+
         const {layout: parentLayout, direction, gap} = this.getParentLayout() || {}
 
-        
+
         const styling = {
             ...this.state.widgetInnerStyling,
-            width, 
+            width,
             height,
-            minWidth, 
+            minWidth,
             minHeight
         }
         return styling
@@ -897,11 +885,10 @@ export class NiceGUIBase extends Widget {
                 height = "100%"
             }
         }
-        
+
         return {width, height, minWidth, minHeight}
 
     }
-
 
     getToolbarAttrs(){
         const {layout, gridConfig, gridWeights, ...toolBarAttrs} = super.getToolbarAttrs()
@@ -925,8 +912,8 @@ export class NiceGUIBase extends Widget {
     }
 
     /**
-     * loads the data 
-     * @param {object} data 
+     * loads the data
+     * @param {object} data
      */
     load(data, callback=null){
 
@@ -944,7 +931,7 @@ export class NiceGUIBase extends Widget {
         let layoutUpdates = {
             parentLayout: parentLayout
         }
-        
+
         if (parentLayout){
             if (parentLayout.layout === Layouts.FLEX || parentLayout.layout === Layouts.GRID){
 
@@ -968,11 +955,10 @@ export class NiceGUIBase extends Widget {
         }
 
         const {layout} = attrs
-        
-        
+
         this.setState(newData,  () => {
             let layoutAttrs = this.setParentLayout(parentLayout).attrs || {}
-            
+
             // UPdates attrs
             let newAttrs = { ...this.state.attrs, ...layoutAttrs }
             // Iterate over each path in the updates object
@@ -993,12 +979,11 @@ export class NiceGUIBase extends Widget {
                     nestedObject[lastKey].value = value
             })
 
-            
+
             if (newAttrs?.styling?.backgroundColor){
-                // TODO: find a better way to apply innerStyles (we may not need this anymore)
+                // TODO: find a better way to apply innerStyles
                 this.setWidgetInnerStyle("backgroundColor", newAttrs.styling.backgroundColor.value)
             }
-
             this.updateState({ attrs: newAttrs }, callback)
 
             // FIXME: when changing layouts all the widgets are being selected
@@ -1009,13 +994,11 @@ export class NiceGUIBase extends Widget {
             if (layout){
                 this.setLayout(layout)
             }
-
-        })  
+        })
 
 
 
     }
-
 
 }
 
@@ -1038,16 +1021,25 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     ...newAttrs.styling,
                     foregroundColor: {
                         label: "Foreground Color",
-                        tool: Tools.COLOR_PICKER, 
+                        tool: Tools.COLOR_PICKER,
                         value: "#000",
                         onChange: (value) => {
                             this.setWidgetInnerStyle("color", value)
                             this.setAttrValue("styling.foregroundColor", value)
                         }
                     },
+                    borderColor: {
+                        label: "Border Color",
+                        tool: Tools.COLOR_PICKER,
+                        value: "#000",
+                        onChange: (value) => {
+                            this.setWidgetInnerStyle("borderColor", value)
+                            this.setAttrValue("styling.borderColor", value)
+                        }
+                    },
                     borderWidth: {
                         label: "Border thickness",
-                        tool: Tools.NUMBER_INPUT, 
+                        tool: Tools.NUMBER_INPUT,
                         toolProps: {min: 0, max: 10},
                         value: 0,
                         onChange: (value) => {
@@ -1055,14 +1047,14 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                             this.setAttrValue("styling.borderWidth", value)
                         }
                     },
-                    relief: {
-                        label: "Relief",
-                        tool: Tools.SELECT_DROPDOWN,
-                        options: RELIEF.map((val) => ({value: val, label: val})),
-                        value: "",
+                    borderRadius: {
+                        label: "Border radius",
+                        tool: Tools.NUMBER_INPUT,
+                        toolProps: {min: 0, max: 140},
+                        value: 0,
                         onChange: (value) => {
-                            // this.setWidgetInnerStyle("fontFamily", NiceGUI_To_GFonts[value])
-                            this.setAttrValue("styling.relief", value)
+                            this.setWidgetInnerStyle("borderRadius", `${value}px`)
+                            this.setAttrValue("styling.borderRadius", value)
                         }
                     },
                     // justify: {
@@ -1081,23 +1073,21 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     padX: {
                         label: "Pad X",
                         tool: Tools.NUMBER_INPUT,
-                        toolProps: {min: 0, max: 140},
+                        toolProps: {min: 1, max: 140},
                         value: null,
                         onChange: (value) => {
                             // this.setWidgetInnerStyle("paddingLeft", `${value}px`)
                             // this.setWidgetInnerStyle("paddingRight", `${value}px`)
 
-                            // const widgetStyle = {
-                               
-                            // }
-                            this.setState((prevState) => ({
+                            const widgetStyle = {
+                                ...this.state.widgetInnerStyling,
+                                paddingLeft: `${value}px`,
+                                paddingRight: `${value}px`
+                            }
+                            this.setState({
 
-                                widgetInnerStyling: {
-                                    ...prevState.widgetInnerStyling,
-                                    paddingLeft: `${value}px`,
-                                    paddingRight: `${value}px`
-                                }
-                            }))
+                                widgetInnerStyling: widgetStyle
+                            })
 
 
                             this.setAttrValue("padding.padX", value)
@@ -1106,22 +1096,18 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     padY: {
                         label: "Pad Y",
                         tool: Tools.NUMBER_INPUT,
-                        toolProps: {min: 0, max: 140},
+                        toolProps: {min: 1, max: 140},
                         value: null,
                         onChange: (value) => {
+                            const widgetStyle = {
+                                ...this.state.widgetInnerStyling,
+                                paddingTop: `${value}px`,
+                                paddingBottom: `${value}px`
+                            }
+                            this.setState({
 
-                            this.setState((prevState) => ({
-
-                                widgetInnerStyling: {
-                                    ...prevState.widgetInnerStyling,
-                                    paddingTop: `${value}px`,
-                                    paddingBottom: `${value}px`
-                                }
-                            }))
-                            // this.setState({
-
-                            //     widgetInnerStyling: widgetStyle
-                            // })
+                                widgetInnerStyling: widgetStyle
+                            })
                             this.setAttrValue("padding.padY", value)
                         }
                     },
@@ -1164,16 +1150,16 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                             this.setAttrValue("margin.marginY", value)
                         }
                     },
-                },       
+                },
                 font: {
                     label: "font",
                     fontFamily: {
                         label: "font family",
                         tool: Tools.SELECT_DROPDOWN,
-                        options: Object.keys(NiceGUI_To_GFonts).map((val) => ({value: val, label: val})),
+                        options: Object.keys(Tkinter_To_GFonts).map((val) => ({value: val, label: val})),
                         value: "",
                         onChange: (value) => {
-                            this.setWidgetInnerStyle("fontFamily", NiceGUI_To_GFonts[value])
+                            this.setWidgetInnerStyle("fontFamily", Tkinter_To_GFonts[value])
                             this.setAttrValue("font.fontFamily", value)
                         }
                     },
@@ -1190,12 +1176,12 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                 },
                 cursor: {
                     label: "Cursor",
-                    tool: Tools.SELECT_DROPDOWN, 
+                    tool: Tools.SELECT_DROPDOWN,
                     toolProps: {placeholder: "select cursor"},
                     value: "",
-                    options: Object.keys(NiceGUI_TO_WEB_CURSOR_MAPPING).map((val) => ({value: val, label: val})),
+                    options: Object.keys(Tkinter_TO_WEB_CURSOR_MAPPING).map((val) => ({value: val, label: val})),
                     onChange: (value) => {
-                        this.setWidgetInnerStyle("cursor", NiceGUI_TO_WEB_CURSOR_MAPPING[value])
+                        this.setWidgetInnerStyle("cursor", Tkinter_TO_WEB_CURSOR_MAPPING[value])
                         this.setAttrValue("cursor", value)
                     }
                 },
@@ -1208,15 +1194,24 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
     getConfigCode(){
 
         const config = {
-            bg: `"${this.getAttrValue("styling.backgroundColor")}"`,
-            fg: `"${this.getAttrValue("styling.foregroundColor")}"`,
+            fg_color: `"${this.getAttrValue("styling.backgroundColor")}"`,
         }
 
-        if (this.getAttrValue("styling.borderWidth"))
-            config["bd"] = this.getAttrValue("styling.borderWidth")
+        if (this.getAttrValue("styling.foregroundColor")){
+            config["text_color"] = `"${this.getAttrValue("styling.foregroundColor")}"`
+        }
 
-        if (this.getAttrValue("styling.relief"))
-            config["relief"] = `tk.${this.getAttrValue("styling.relief")}`
+        if (this.getAttrValue("styling.borderRadius")){
+            config["corner_radius"] = this.getAttrValue("styling.borderRadius")
+        }
+
+        if (this.getAttrValue("styling.borderColor")){
+            config["border_color"] = `"${this.getAttrValue("styling.borderColor")}"`
+        }
+
+
+        if (this.getAttrValue("styling.borderWidth"))
+            config["border_width"] = this.getAttrValue("styling.borderWidth")
 
         if (this.getAttrValue("font.fontFamily") || this.getAttrValue("font.fontSize")){
             config["font"] = `("${this.getAttrValue("font.fontFamily")}", ${this.getAttrValue("font.fontSize") || 12}, )`
@@ -1243,13 +1238,15 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
         //     config["pady"] = this.getAttrValue("margin.marginY")
         // }
 
-        // FIXME: add width and height, the scales may not be correct as the width and height are based on characters in label and grid not pixels
+        // FIXME: add width and height, the scales may not be correct as the width and height are based on characters in pack and grid not pixels
+
         // if (!this.state.fitContent.width){
         //     config["width"] = this.state.size.width
         // }
         // if (!this.state.fitContent.height){
         //     config["height"] = this.state.size.height
         // }
+
 
         return config
     }

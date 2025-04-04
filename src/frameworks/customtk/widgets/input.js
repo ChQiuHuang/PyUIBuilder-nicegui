@@ -1,13 +1,13 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString } from "../../../utils/common"
-import { NiceGUIWidgetBase } from "./base"
+import { CustomTkWidgetBase } from "./base"
 
 
-export class Input extends NiceGUIWidgetBase{
+export class Input extends CustomTkWidgetBase{
 
     static widgetType = "entry"
     static displayName = "Entry"
-    
+
     constructor(props) {
         super(props)
 
@@ -20,7 +20,7 @@ export class Input extends NiceGUIWidgetBase{
                 placeHolder: {
                     label: "PlaceHolder",
                     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
-                    toolProps: {placeholder: "text", maxLength: 100}, 
+                    toolProps: {placeholder: "text", maxLength: 100},
                     value: "placeholder text",
                     onChange: (value) => this.setAttrValue("placeHolder", value)
                 }
@@ -37,7 +37,7 @@ export class Input extends NiceGUIWidgetBase{
     generateCode(variableName, parent){
 
         const placeHolderText = this.getAttrValue("placeHolder")
-        
+
         const config = convertObjectToKeyValueString(this.getConfigCode())
 
         return [
@@ -65,7 +65,7 @@ export class Input extends NiceGUIWidgetBase{
     renderContent(){
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="tw-p-2 tw-w-full tw-h-full tw-flex tw-place-items-center" 
+                <div className="tw-p-2 tw-w-full tw-h-full tw-flex tw-place-items-center"
                         ref={this.styleAreaRef}
                         style={this.getInnerRenderStyling()}>
                     <div className="tw-text-sm tw-text-gray-300">
@@ -79,7 +79,7 @@ export class Input extends NiceGUIWidgetBase{
 }
 
 
-export class Text extends NiceGUIWidgetBase{
+export class Text extends CustomTkWidgetBase{
 
     static widgetType = "Text"
 

@@ -2,10 +2,10 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { CheckSquareFilled } from "@ant-design/icons"
-import { TkinterWidgetBase } from "./base"
+import { NiceGUIWidgetBase } from "./base"
 
 
-export class CheckBox extends TkinterWidgetBase{
+export class CheckBox extends NiceGUIWidgetBase{
 
     static widgetType = "check_button"
     static displayName = "Check Box"
@@ -40,7 +40,7 @@ export class CheckBox extends TkinterWidgetBase{
                 checkLabel: {
                     label: "Check Label",
                     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
-                    toolProps: {placeholder: "Button label", maxLength: 100}, 
+                    toolProps: {placeholder: "Button label", maxLength: 100},
                     value: "Checkbox",
                     onChange: (value) => this.setAttrValue("checkLabel", value)
                 },
@@ -64,19 +64,19 @@ export class CheckBox extends TkinterWidgetBase{
     generateCode(variableName, parent){
 
         const labelText = this.getAttrValue("checkLabel")
-        const config = convertObjectToKeyValueString(this.getConfigCode())
+        const config = this.getConfigCode()
 
         const code = [
-                `${variableName} = tk.Checkbutton(master=${parent}, text="${labelText}")`,
-                `${variableName}.config(${config})`,
-            ]
-        
+            `${variableName} = ctk.CTkCheckBox(master=${parent}, text="${labelText}")`,
+            `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+        ]
+
         if (this.getAttrValue("defaultChecked")){
             code.push(`${variableName}.select()`)
         }
-        
+
         code.push(`${variableName}.${this.getLayoutCode()}`)
-        
+
         return code
     }
 
@@ -97,13 +97,12 @@ export class CheckBox extends TkinterWidgetBase{
     renderContent(){
         return (
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
-                style={this.getInnerRenderStyling()}
-                ref={this.styleAreaRef}
-                >
-                
+                 style={this.getInnerRenderStyling()}
+            >
+
                 <div className="tw-flex tw-gap-2 tw-w-full tw-h-full tw-place-items-center tw-place-content-center">
                     <div className="tw-border-solid tw-border-[#D9D9D9] tw-border-2
-                                    tw-min-w-[20px] tw-min-h-[20px] tw-w-[20px] tw-h-[20px] 
+                                    tw-min-w-[20px] tw-min-h-[20px] tw-w-[20px] tw-h-[20px]
                                     tw-text-blue-600 tw-flex tw-items-center tw-justify-center
                                     tw-rounded-md tw-overflow-hidden">
                         {
@@ -115,7 +114,7 @@ export class CheckBox extends TkinterWidgetBase{
 
                     {this.getAttrValue("checkLabel")}
                 </div>
-              
+
             </div>
         )
     }
@@ -123,34 +122,29 @@ export class CheckBox extends TkinterWidgetBase{
 }
 
 
-export class RadioButton extends TkinterWidgetBase{
+export class RadioButton extends NiceGUIWidgetBase{
     // FIXME: the radio buttons are not visible because of the default heigh provided
 
     static widgetType = "radio_button"
-    static displayName = "Radio Button"
-    
+
     constructor(props) {
         super(props)
 
         this.minSize = {width: 50, height: 30}
-        
-        let newAttrs = removeKeyFromObject("layout", this.state.attrs)
-        
+
         this.state = {
             ...this.state,
             size: { width: 80, height: 30 },
             fitContent: { width: true, height: true },
             widgetName: "Radio button",
             attrs: {
-                 ...newAttrs,
+                ...this.state.attrs,
                 radios: {
                     label: "Radio Group",
                     tool: Tools.INPUT_RADIO_LIST,
-                    value: {inputs: ["default"], selectedRadio: null},
+                    value: {inputs: ["default"], selectedRadio: -1},
                     onChange: ({inputs, selectedRadio}) => {
-                        this.setAttrValue("radios", {inputs, selectedRadio}, () => {
-                            console.log("attribute set: ", this.state.attrs.radios, {inputs, selectedRadio},)
-                        })
+                        this.setAttrValue("radios", {inputs, selectedRadio})
                     }
                 }
 
@@ -166,20 +160,26 @@ export class RadioButton extends TkinterWidgetBase{
 
     generateCode(variableName, parent){
 
-        const config = convertObjectToKeyValueString(this.getConfigCode())
+        const {border_width, ...config} = this.getConfigCode()
 
-        
+        if (border_width){
+            // there is no border width in RadioButton
+            config["border_width_checked"] = border_width
+        }
+
+
         const code = [
-            `${variableName}_var = tk.IntVar()`,
+            `${variableName}_var = ctk.IntVar()`,
         ]
         const radios = this.getAttrValue("radios")
-        
+        // FIXME: Error: ValueError: ['value'] are not supported arguments. Look at the documentation for supported arguments.
+
         radios.inputs.forEach((radio_text, idx) => {
 
             const radioBtnVariable = `${variableName}_${idx}`
             code.push(`\n`)
-            code.push(`${radioBtnVariable} = tk.Radiobutton(master=${parent}, variable=${variableName}_var, text="${radio_text}")`)
-            code.push(`${radioBtnVariable}.config(${config}, value=${idx})`)
+            code.push(`${radioBtnVariable} = ctk.CTkRadioButton(master=${parent}, variable=${variableName}_var, text="${radio_text}", value=${idx})`)
+            code.push(`${radioBtnVariable}.configure(${convertObjectToKeyValueString(config)})`)
             code.push(`${radioBtnVariable}.${this.getLayoutCode()}`)
         })
 
@@ -188,8 +188,8 @@ export class RadioButton extends TkinterWidgetBase{
         if (defaultSelected !== -1){
             code.push(`${variableName}_var.set(${defaultSelected})`)
         }
-        
-        
+
+
         return code
     }
 
@@ -213,8 +213,9 @@ export class RadioButton extends TkinterWidgetBase{
 
         return (
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
-                style={this.getInnerRenderStyling()}
-                >
+                 ref={this.styleAreaRef}
+                 style={this.getInnerRenderStyling()}
+            >
                 <div className="tw-flex tw-flex-col tw-gap-2 tw-w-fit tw-h-fit">
                     {
                         inputs.map((value, index) => {
@@ -224,12 +225,12 @@ export class RadioButton extends TkinterWidgetBase{
                                                     tw-min-w-[20px] tw-min-h-[20px] tw-w-[20px] tw-h-[20px] 
                                                     tw-text-blue-600 tw-flex tw-items-center tw-justify-center
                                                     tw-rounded-full tw-overflow-hidden tw-p-1">
-                                        
+
                                         {
                                             selectedRadio === index &&
-                                                <div className="tw-rounded-full tw-bg-blue-600 tw-w-full tw-h-full">
+                                            <div className="tw-rounded-full tw-bg-blue-600 tw-w-full tw-h-full">
 
-                                                </div>
+                                            </div>
                                         }
                                     </div>
                                     <span className="tw-text-base" style={{color: this.state.widgetInnerStyling.foregroundColor}}>
@@ -238,7 +239,7 @@ export class RadioButton extends TkinterWidgetBase{
                                 </div>
                             )
                         })
-                        
+
                     }
                 </div>
             </div>

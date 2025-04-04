@@ -1,10 +1,10 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
-import { NiceGUIWidgetBase } from "./base"
+import { CustomTkWidgetBase } from "./base"
 
 
-class Slider extends NiceGUIWidgetBase{
+class Slider extends CustomTkWidgetBase{
 
     static widgetType = "scale"
     static displayName = "Scale"
