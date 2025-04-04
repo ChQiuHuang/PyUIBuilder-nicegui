@@ -1,8 +1,8 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString } from "../../../utils/common"
-import { NiceGUI } from "./base"
+import { NiceGUIWidgetBase } from "./base"
 
-class Button extends NiceGUI {
+class Button extends NiceGUIWidgetBase {
     static widgetType = "button"
     static displayName = "Button"
 
