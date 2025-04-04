@@ -3,17 +3,17 @@ import Tools from "../../../canvas/constants/tools"
 import Widget from "../../../canvas/widgets/base"
 import { DynamicGridWeightInput } from "../../../components/inputs"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
-import { Tkinter_TO_WEB_CURSOR_MAPPING } from "../constants/cursor"
-import { Tkinter_To_GFonts } from "../constants/fontFamily"
+import { NiceGUI_TO_WEB_CURSOR_MAPPING } from "../constants/cursor"
+import { NiceGUI_To_GFonts } from "../constants/fontFamily"
 import { ANCHOR, GRID_STICKY, JUSTIFY, RELIEF } from "../constants/styling"
 
 
 
 export class NiceGUIBase extends Widget {
 
-    static requiredImports = ['import customtkinter as ctk']
+    static requiredImports = ['import nicegui as ui']
 
-    static requirements = ['customtkinter']
+    static requirements = ['nicegui']
 
     constructor(props) {
         super(props)
@@ -28,21 +28,21 @@ export class NiceGUIBase extends Widget {
             }
         }
 
-        this.renderTkinterLayout = this.renderTkinterLayout.bind(this) // this must be called if droppableTags is not set to null
+        this.renderNiceGUILayout = this.renderNiceGUILayout.bind(this) // this must be called if droppableTags is not set to null
 
         const originalRenderContent = this.renderContent.bind(this);
         this.renderContent = () => {
-            this._calledRenderTkinterLayout = false
+            this._calledRenderNiceGUILayout = false
 
             const content = originalRenderContent()
 
             if (
                 this.droppableTags !== null &&
                 this.droppableTags !== undefined &&
-                !this._calledRenderTkinterLayout
+                !this._calledRenderNiceGUILayout
             ) {
                 throw new Error(
-                    `class ${this.constructor.name}: renderTkinterLayout() must be called inside renderContent() when droppableTags is not null`
+                    `class ${this.constructor.name}: renderNiceGUILayout() must be called inside renderContent() when droppableTags is not null`
                 )
             }
 
@@ -203,7 +203,7 @@ export class NiceGUIBase extends Widget {
 
             if (rowWeights){
                 const correctedRowWeight = Object.fromEntries(
-                    Object.entries(rowWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) // tkinter grid starts from 0 unlike css grid
+                    Object.entries(rowWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) // NiceGUI grid starts from 0 unlike css grid
                 );// converts the format : {index: {gridNo, weight}} to {gridNo: weight}
 
                 const groupByWeight = Object.entries(correctedRowWeight).reduce((acc, [gridNo, weight]) => {
@@ -221,7 +221,7 @@ export class NiceGUIBase extends Widget {
 
             if (colWeights){
                 const correctedColWeight = Object.fromEntries(
-                    Object.entries(colWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) //  tkinter grid starts from 0, so -1
+                    Object.entries(colWeights).map(([_, { gridNo, weight }]) => [gridNo-1, weight]) //  NiceGUI grid starts from 0, so -1
                 ) // converts the format : {index: {gridNo, weight}} to {gridNo: weight}
 
                 const groupByWeight = Object.entries(correctedColWeight).reduce((acc, [gridNo, weight]) => {
@@ -252,7 +252,7 @@ export class NiceGUIBase extends Widget {
     }
 
     /**
-     * A simple function that returns a mapping for grid sticky tkinter
+     * A simple function that returns a mapping for grid sticky NiceGUI
      */
     getGridStickyStyling(sticky){
 
@@ -544,7 +544,7 @@ export class NiceGUIBase extends Widget {
 
 
     /**
-     * adds the layout to achieve the pack from tkinter refer: https://www.youtube.com/watch?v=rbW1iJO1psk
+     * adds the layout to achieve the pack from NiceGUI refer: https://www.youtube.com/watch?v=rbW1iJO1psk
      * @param {*} widgets
      * @param {*} index
      * @returns
@@ -667,8 +667,8 @@ export class NiceGUIBase extends Widget {
      *
      * Helps with pack layout manager and grid manager
      */
-    renderTkinterLayout(){
-        this._calledRenderTkinterLayout = true // NOTE: this is set so subclass are forced to call this method if droppable tags are not null
+    renderNiceGUILayout(){
+        this._calledRenderNiceGUILayout = true // NOTE: this is set so subclass are forced to call this method if droppable tags are not null
         const {layout, direction, gap} = this.getLayout()
 
         if (layout === Layouts.FLEX){
@@ -1156,10 +1156,10 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     fontFamily: {
                         label: "font family",
                         tool: Tools.SELECT_DROPDOWN,
-                        options: Object.keys(Tkinter_To_GFonts).map((val) => ({value: val, label: val})),
+                        options: Object.keys(NiceGUI_To_GFonts).map((val) => ({value: val, label: val})),
                         value: "",
                         onChange: (value) => {
-                            this.setWidgetInnerStyle("fontFamily", Tkinter_To_GFonts[value])
+                            this.setWidgetInnerStyle("fontFamily", NiceGUI_To_GFonts[value])
                             this.setAttrValue("font.fontFamily", value)
                         }
                     },
@@ -1179,9 +1179,9 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     tool: Tools.SELECT_DROPDOWN,
                     toolProps: {placeholder: "select cursor"},
                     value: "",
-                    options: Object.keys(Tkinter_TO_WEB_CURSOR_MAPPING).map((val) => ({value: val, label: val})),
+                    options: Object.keys(NiceGUI_TO_WEB_CURSOR_MAPPING).map((val) => ({value: val, label: val})),
                     onChange: (value) => {
-                        this.setWidgetInnerStyle("cursor", Tkinter_TO_WEB_CURSOR_MAPPING[value])
+                        this.setWidgetInnerStyle("cursor", NiceGUI_TO_WEB_CURSOR_MAPPING[value])
                         this.setAttrValue("cursor", value)
                     }
                 },
