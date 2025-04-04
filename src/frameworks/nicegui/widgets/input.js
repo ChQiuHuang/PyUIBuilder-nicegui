@@ -1,9 +1,9 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString } from "../../../utils/common"
-import { NiceGUIWidgetBase } from "./base"
+import { TkinterWidgetBase } from "./base"
 
 
-export class Input extends NiceGUIWidgetBase{
+export class Input extends TkinterWidgetBase{
 
     static widgetType = "entry"
     static displayName = "Entry"
@@ -41,8 +41,8 @@ export class Input extends NiceGUIWidgetBase{
         const config = convertObjectToKeyValueString(this.getConfigCode())
 
         return [
-                `${variableName} = ctk.CTkEntry(master=${parent}, placeholder_text="${placeHolderText}")`,
-                `${variableName}.configure(${config})`,
+                `${variableName} = tk.Entry(master=${parent})`,
+                `${variableName}.config(${config})`,
                 `${variableName}.${this.getLayoutCode()}`
             ]
     }
@@ -79,7 +79,7 @@ export class Input extends NiceGUIWidgetBase{
 }
 
 
-export class Text extends NiceGUIWidgetBase{
+export class Text extends TkinterWidgetBase{
 
     static widgetType = "Text"
 
@@ -116,8 +116,8 @@ export class Text extends NiceGUIWidgetBase{
         const config = convertObjectToKeyValueString(this.getConfigCode())
 
         return [
-                `${variableName} = ctk.CTkTextbox(master=${parent})`,
-                `${variableName}.configure(${config})`,
+                `${variableName} = tk.Text(master=${parent})`,
+                `${variableName}.config(${config})`,
                 `${variableName}.${this.getLayoutCode()}`
             ]
     }
@@ -140,6 +140,7 @@ export class Text extends NiceGUIWidgetBase{
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
                 <div className="tw-p-2 tw-w-full tw-h-full tw-content-start " 
+                        ref={this.styleAreaRef}
                         style={this.getInnerRenderStyling()}>
                     <div className="tw-text-sm tw-text-gray-300">
                         {this.getAttrValue("placeHolder")}

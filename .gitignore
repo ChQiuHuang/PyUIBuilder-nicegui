@@ -4,7 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
-
+# PLEASE NO
+.env
 .env-cmdrc.json
 build
 dist

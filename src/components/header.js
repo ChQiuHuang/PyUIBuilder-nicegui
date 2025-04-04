@@ -16,6 +16,10 @@ const items = [
         value: FrameWorks.CUSTOMTK,
         label: 'customtk',
     },
+    {
+      value: FrameWorks.NICEGUI,
+      label: 'nicegui',
+    },
 ]
 
 

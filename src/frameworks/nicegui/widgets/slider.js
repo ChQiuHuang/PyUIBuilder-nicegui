@@ -1,10 +1,10 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
-import { NiceGUIWidgetBase } from "./base"
+import {TkinterBase, TkinterWidgetBase} from "./base"
 
 
-class Slider extends NiceGUIWidgetBase{
+class Slider extends TkinterWidgetBase{
 
     static widgetType = "scale"
     static displayName = "Scale"
@@ -13,26 +13,23 @@ class Slider extends NiceGUIWidgetBase{
     constructor(props) {
         super(props)
 
-        let newAttrs = removeKeyFromObject("styling.foregroundColor", this.state.attrs)
-
-
         this.state = {
             ...this.state,
             widgetName: "Scale",
             size: { width: 120, height: 10 },
             fitContent: {width: true, height: true},
             attrs: {
-                ...newAttrs,
+                ...this.state.attrs,
                 styling: {
-                    ...newAttrs.styling,
+                    ...this.state.attrs.styling,
                     // TODO: trough color
-                    progressColor: {
-                        label: "Progress Color",
+                    troughColor: {
+                        label: "Trough Color",
                         tool: Tools.COLOR_PICKER, 
-                        value: "#029CFF",
+                        value: "#fff",
                         onChange: (value) => {
                             // this.setWidgetInnerStyle("color", value)
-                            this.setAttrValue("styling.progressColor", value)
+                            this.setAttrValue("styling.troughColor", value)
                         }
                     }
                 },
@@ -106,9 +103,7 @@ class Slider extends NiceGUIWidgetBase{
 
         config["from_"] = this.getAttrValue("scale.min")
         config["to"] = this.getAttrValue("scale.max")
-        config["number_of_steps"] = this.getAttrValue("scale.step")
-
-        config["progress_color"] = `"${this.getAttrValue("styling.progressColor")}"`
+        config["resolution"] = this.getAttrValue("scale.step")
 
         if (this.getAttrValue("orientation")){
             config["orientation"] = this.getAttrValue("orientation")
@@ -117,9 +112,9 @@ class Slider extends NiceGUIWidgetBase{
         const defaultValue = this.getAttrValue("scale.default")
 
         return [
-                `${variableName}_var = ctk.DoubleVar(value=${defaultValue})`,
-                `${variableName} = ctk.CTkSlider(master=${parent}, variable=${variableName}_var)`,
-                `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+                `${variableName}_var = tk.DoubleVar(value=${defaultValue})`,
+                `${variableName} = tk.Scale(master=${parent}, variable=${variableName}_var)`,
+                `${variableName}.config(${convertObjectToKeyValueString(config)})`,
                 `${variableName}.${this.getLayoutCode()}`
             ]
     }
@@ -144,8 +139,8 @@ class Slider extends NiceGUIWidgetBase{
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
                 <div className="flex flex-col items-center justify-center h-screen 
                                 bg-gray-100" 
-                            ref={this.styleAreaRef}
-                            style={this.getInnerRenderStyling()}>
+                                ref={this.styleAreaRef}
+                                style={this.getInnerRenderStyling()}>
                     <div className="w-full max-w-md">
                         <input
                             type="range"

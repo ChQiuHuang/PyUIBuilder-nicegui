@@ -2,10 +2,10 @@ import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { DownOutlined, UpOutlined } from "@ant-design/icons"
-import { NiceGUIWidgetBase } from "./base"
+import {TkinterBase, TkinterWidgetBase} from "./base"
 
-// TODO: https://github.com/TomSchimansky/CustomTkinter/wiki/Create-new-widgets-(Spinbox)
-class SpinBox extends NiceGUIWidgetBase{
+
+class SpinBox extends TkinterWidgetBase{
 
     static widgetType = "spin_box"
     static displayName = "Spin Box"
@@ -86,7 +86,7 @@ class SpinBox extends NiceGUIWidgetBase{
 
         return [
                ...code,
-                `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+                `${variableName}.config(${convertObjectToKeyValueString(config)})`,
                 `${variableName}.${this.getLayoutCode()}`
             ]
     }

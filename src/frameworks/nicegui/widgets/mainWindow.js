@@ -1,13 +1,19 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
+import { TkinterBase } from "./base"
+import { removeKeyFromObject } from "../../../utils/common"
 import { getPythonAssetPath } from "../../utils/pythonFilePath"
-import { NiceGUIBase } from "./base"
 
 
-class TopLevel extends NiceGUIBase{
+class MainWindow extends TkinterBase{
 
-    static widgetType = "toplevel"
-    static displayName = "Top Level"
+    static widgetType = "main_window"
+    static displayName = "Main Window"
+
+    static initialSize = {
+        width: 700,
+        height: 400
+    }
 
     constructor(props) {
         super(props)
@@ -15,23 +21,24 @@ class TopLevel extends NiceGUIBase{
         this.droppableTags = {
             exclude: ["image", "video", "media", "main_window", "toplevel"]
         }
-        this.maxSize = { width: 2000, height: 2000 } // disables resizing above this number
+
+        const newAttrs = removeKeyFromObject("margin", this.state.attrs)
 
         this.state = {
             ...this.state,
-            size: { width: 450, height: 200 },
-            widgetName: "top level",
+            size: { width: MainWindow.initialSize.width, height: MainWindow.initialSize.height },
+            widgetName: "main",
             attrs: {
-                ...this.state.attrs,
+                ...newAttrs,
                 title: {
                     label: "Window Title",
                     tool: Tools.INPUT, // the tool to display, can be either HTML ELement or a constant string
                     toolProps: {placeholder: "Window title", maxLength: 40}, 
-                    value: "Top level",
+                    value: "Main Window",
                     onChange: (value) => this.setAttrValue("title", value)
                 },
                 logo: {
-                    label: "Toplevel Logo",
+                    label: "Window Logo",
                     tool: Tools.UPLOADED_LIST, 
                     toolProps: {filterOptions: ["image/jpg", "image/jpeg", "image/png"]}, 
                     value: "",
@@ -40,12 +47,14 @@ class TopLevel extends NiceGUIBase{
 
             }
         }
+
     }
 
-    componentDidMount(){
-        this.setAttrValue("styling.backgroundColor", "#23272D")
-        super.componentDidMount()
-    }
+
+    // componentDidMount(){
+    //     // this.setAttrValue("styling.backgroundColor", "#E4E2E2")
+    //     super.componentDidMount()
+    // }
 
     generateCode(variableName, parent){
 
@@ -56,11 +65,10 @@ class TopLevel extends NiceGUIBase{
         const {width, height} = this.getSize()
 
         const code = [
-            `${variableName} = ctk.CTkToplevel(master=${parent})`,
-            `${variableName}.configure(fg_color="${backgroundColor}")`,
+            `${variableName} = tk.Tk()`,
+            `${variableName}.config(bg="${backgroundColor}")`,
             `${variableName}.title("${this.getAttrValue("title")}")`,
             `${variableName}.geometry("${width}x${height}")`,
-
             ...this.getGridLayoutConfigurationCode(variableName)
         ]
 
@@ -73,6 +81,7 @@ class TopLevel extends NiceGUIBase{
             // code.push("\n")
         }
 
+
         return code
     }
 
@@ -84,7 +93,6 @@ class TopLevel extends NiceGUIBase{
 
         return imports
     }
-
 
     getRequirements(){
         const requirements = super.getRequirements()
@@ -100,6 +108,7 @@ class TopLevel extends NiceGUIBase{
         const toolBarAttrs = super.getToolbarAttrs()
 
         return ({
+            id: this.__id,
             widgetName: toolBarAttrs.widgetName,
             title: this.state.attrs.title,
             logo: this.state.attrs.logo,
@@ -110,10 +119,20 @@ class TopLevel extends NiceGUIBase{
     }
 
     renderContent(){
+
+        const logo = this.getAttrValue("logo")
+
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
+               
                 <div className="tw-flex tw-w-full tw-h-[25px] tw-bg-[#c7c7c7] tw-p-1
-                                tw-overflow-hidden tw-shadow-xl tw-place-items-center">
+                                tw-overflow-hidden tw-shadow-xl tw-place-items-center tw-gap-1">
+                    {
+                        logo && (
+                            <img src={logo.previewUrl} alt={logo.name} 
+                                    className="tw-bg-contain tw-w-[15px] tw-h-[15px] tw-rounded-sm" />
+                        )
+                    }
                     <div className="tw-text-sm">{this.getAttrValue("title")}</div>
                     <div className="tw-ml-auto tw-flex tw-gap-1  tw-place-items-center">
                         <div className="tw-bg-yellow-400 tw-rounded-full tw-w-[15px] tw-h-[15px]">
@@ -124,10 +143,11 @@ class TopLevel extends NiceGUIBase{
                         </div>
                     </div>
                 </div>
-                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start" 
-                    ref={this.styleAreaRef}
-                    style={this.state.widgetInnerStyling}>
-                    {this.renderTkinterLayout()}
+                <div className="tw-p-2 tw-w-full tw-relative tw-h-full tw-overflow-hidden tw-content-start" 
+                        ref={this.styleAreaRef}
+                        style={{...this.getInnerRenderStyling(), width: "100%", height: "calc(100% - 25px)"}}>
+                    {/* {this.props.children} */}
+                    {this.renderTkinterLayout()} {/* This is required for pack layouts, so if your widget accepts child widgets, ensure to add this */}
                 </div>
             </div>
         )
@@ -136,4 +156,4 @@ class TopLevel extends NiceGUIBase{
 }
 
 
-export default TopLevel
+export default MainWindow

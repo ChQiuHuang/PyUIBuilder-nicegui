@@ -1,10 +1,10 @@
 import Tools from "../../../canvas/constants/tools"
 import {  DownOutlined } from "@ant-design/icons"
-import { NiceGUIWidgetBase} from "./base"
-import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
+import { TkinterWidgetBase} from "./base"
+import { convertObjectToKeyValueString } from "../../../utils/common"
 
 
-class OptionMenu extends NiceGUIWidgetBase{
+class OptionMenu extends TkinterWidgetBase{
 
     static widgetType = "option_menu"
     static displayName = "Option Menu"
@@ -15,10 +15,7 @@ class OptionMenu extends NiceGUIWidgetBase{
         // const {layout, ...newAttrs} = this.state.attrs // Removes the layout attribute
 
         this.minSize = {width: 50, height: 30}
-        
-        let newAttrs = removeKeyFromObject("styling.borderColor", this.state.attrs)
-        newAttrs = removeKeyFromObject("styling.borderWidth", newAttrs)
-
+                
         this.state = {
             ...this.state,
             isDropDownOpen: false,
@@ -26,7 +23,7 @@ class OptionMenu extends NiceGUIWidgetBase{
             size: { width: 120, height: 30 },
             fitContent: { width: true, height: true },
             attrs: {
-                ...newAttrs,
+                ...this.state.attrs,
                 defaultValue: {
                     label: "Default Value",
                     tool: Tools.INPUT,
@@ -48,30 +45,30 @@ class OptionMenu extends NiceGUIWidgetBase{
         }
 
     }
-
+   
     componentDidMount(){
         super.componentDidMount()
-        this.setWidgetInnerStyle("backgroundColor", "#fff")
+        this.setWidgetInnerStyle("backgroundColor", "#E4E2E2")
     }
 
     generateCode(variableName, parent){
 
         
-        const config = this.getConfigCode()
+        const config = convertObjectToKeyValueString(this.getConfigCode())
 
         const defaultValue = this.getAttrValue("defaultValue")
         const options = this.getAttrValue("widgetOptions").inputs
 
         const code = [
             `${variableName}_options = ${JSON.stringify(options)}`,
-            `${variableName}_var = ctk.StringVar(value="${options.at(1) || defaultValue || ''}")`,
-            `${variableName} = ctk.CTkOptionMenu(${parent}, variable=${variableName}_var, values=${variableName}_options)`
+            `${variableName}_var = tk.StringVar(value="${options.at(1) || defaultValue || ''}")`,
+            `${variableName} = tk.OptionMenu(${parent}, ${variableName}_var, *${variableName}_options)`
         ]
 
 
         return [
                 ...code,
-                `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+                `${variableName}.config(${config})`,
                 `${variableName}.${this.getLayoutCode()}`
             ]
     }
@@ -103,8 +100,8 @@ class OptionMenu extends NiceGUIWidgetBase{
 
         return (
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
-                ref={this.styleAreaRef}    
                 style={this.getInnerRenderStyling()}
+                ref={this.styleAreaRef}
                 onClick={this.toggleDropDownOpen}
                 >
                 <div className="tw-flex tw-justify-between tw-gap-1">

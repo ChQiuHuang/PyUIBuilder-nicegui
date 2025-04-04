@@ -24,12 +24,13 @@ import FrameWorks from './constants/frameworks'
 import CustomTkWidgets from './frameworks/customtk/sidebarWidgets'
 import CustomTkPluginWidgets from './frameworks/customtk/sidebarPlugins'
 import generateCustomTkCode from './frameworks/customtk/engine/code'
-
+import NiceguiWidgets from './frameworks/nicegui/sidebarWidgets'
+import NiceguiPluginWidgets from './frameworks/nicegui/sidebarPlugins'
 import TkinterWidgets from './frameworks/tkinter/sidebarWidgets'
 import TkinterPluginWidgets from './frameworks/tkinter/sidebarPlugins'
 import generateTkinterCode from './frameworks/tkinter/engine/code'
 
-import TkMainWindow from './frameworks/tkinter/widgets/mainWindow' 
+import TkMainWindow from './frameworks/tkinter/widgets/mainWindow'
 import CTkMainWindow from './frameworks/customtk/widgets/mainWindow' 
 import TreeviewContainer from './sidebar/treeviewContainer'
 import { WidgetContextProvider } from './canvas/context/widgetContext'
@@ -269,6 +270,9 @@ function App() {
 		}else if (framework === FrameWorks.CUSTOMTK){
 			setSidebarPlugins(CustomTkPluginWidgets)
 			setSidebarWidgets(CustomTkWidgets)
+		}else if (framework === FrameWorks.NICEGUI){
+			setSidebarPlugins(NiceguiPluginWidgets)
+			setSidebarWidgets(NiceguiWidgets)
 		}
 
 	}

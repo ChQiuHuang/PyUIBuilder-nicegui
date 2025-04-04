@@ -1,13 +1,14 @@
 import Widget from "../../../canvas/widgets/base"
 import Tools from "../../../canvas/constants/tools"
 import { getPythonAssetPath } from "../../utils/pythonFilePath"
-import { NiceGUIBase } from "./base"
+import { TkinterBase } from "./base"
 
 
-class TopLevel extends NiceGUIBase{
+class TopLevel extends TkinterBase{
 
     static widgetType = "toplevel"
     static displayName = "Top Level"
+
 
     constructor(props) {
         super(props)
@@ -43,9 +44,10 @@ class TopLevel extends NiceGUIBase{
     }
 
     componentDidMount(){
-        this.setAttrValue("styling.backgroundColor", "#23272D")
+        this.setAttrValue("styling.backgroundColor", "#E4E2E2")
         super.componentDidMount()
     }
+
 
     generateCode(variableName, parent){
 
@@ -56,8 +58,8 @@ class TopLevel extends NiceGUIBase{
         const {width, height} = this.getSize()
 
         const code = [
-            `${variableName} = ctk.CTkToplevel(master=${parent})`,
-            `${variableName}.configure(fg_color="${backgroundColor}")`,
+            `${variableName} = tk.Toplevel(master=${parent})`,
+            `${variableName}.config(bg="${backgroundColor}")`,
             `${variableName}.title("${this.getAttrValue("title")}")`,
             `${variableName}.geometry("${width}x${height}")`,
 
@@ -73,6 +75,7 @@ class TopLevel extends NiceGUIBase{
             // code.push("\n")
         }
 
+
         return code
     }
 
@@ -84,7 +87,6 @@ class TopLevel extends NiceGUIBase{
 
         return imports
     }
-
 
     getRequirements(){
         const requirements = super.getRequirements()
@@ -110,10 +112,18 @@ class TopLevel extends NiceGUIBase{
     }
 
     renderContent(){
+        const logo = this.getAttrValue("logo")
+
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden">
-                <div className="tw-flex tw-w-full tw-h-[25px] tw-bg-[#c7c7c7] tw-p-1
+                <div className="tw-flex tw-w-full tw-h-[25px] tw-bg-[#c7c7c7] tw-p-1 tw-gap-1
                                 tw-overflow-hidden tw-shadow-xl tw-place-items-center">
+                    {
+                        logo && (
+                            <img src={logo.previewUrl} alt={logo.name} 
+                                    className="tw-bg-contain tw-w-[15px] tw-h-[15px] tw-rounded-sm" />
+                        )
+                    }
                     <div className="tw-text-sm">{this.getAttrValue("title")}</div>
                     <div className="tw-ml-auto tw-flex tw-gap-1  tw-place-items-center">
                         <div className="tw-bg-yellow-400 tw-rounded-full tw-w-[15px] tw-h-[15px]">
@@ -124,7 +134,7 @@ class TopLevel extends NiceGUIBase{
                         </div>
                     </div>
                 </div>
-                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start" 
+                <div className="tw-p-2 tw-w-full tw-h-full tw-content-start"
                     ref={this.styleAreaRef}
                     style={this.state.widgetInnerStyling}>
                     {this.renderTkinterLayout()}

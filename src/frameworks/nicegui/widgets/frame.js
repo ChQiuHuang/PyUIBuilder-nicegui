@@ -1,10 +1,11 @@
 import { Layouts } from "../../../canvas/constants/layouts"
 import Tools from "../../../canvas/constants/tools"
 import Widget from "../../../canvas/widgets/base"
-import { NiceGUIBase } from "./base"
+import { convertObjectToKeyValueString } from "../../../utils/common"
+import {TkinterBase} from "./base"
 
 
-class Frame extends NiceGUIBase{
+class Frame extends TkinterBase{
 
     static widgetType = "frame"
     static displayName = "Frame"
@@ -148,14 +149,13 @@ class Frame extends NiceGUIBase{
         return config
     }
 
-
     generateCode(variableName, parent){
 
-        const bg = this.getAttrValue("styling.backgroundColor")
+        const config = convertObjectToKeyValueString(this.getConfigCode())
 
         return [
-                `${variableName} = ctk.CTkFrame(master=${parent})`,
-                `${variableName}.configure(fg_color="${bg}")`,
+                `${variableName} = tk.Frame(master=${parent})`,
+                `${variableName}.config(${config})`,
                 `${variableName}.${this.getLayoutCode()}`,
                 ...this.getGridLayoutConfigurationCode(variableName)
             ]
@@ -174,8 +174,8 @@ class Frame extends NiceGUIBase{
             gridConfig,
             gridWeights
         })
-    }
-    
+    }    
+
     renderContent(){
         // console.log("bounding rect: ", this.getBoundingRect())
 
@@ -183,9 +183,9 @@ class Frame extends NiceGUIBase{
         return (
             <div className="tw-w-flex tw-flex-col tw-w-full tw-h-full tw-relative tw-rounded-md tw-overflow-hidden">
                 <div className="tw-p-2 tw-w-full tw-h-full tw-content-start" 
-                        ref={this.styleAreaRef}
-                        style={this.getInnerRenderStyling()}>
-                    {this.renderTkinterLayout()}
+                    ref={this.styleAreaRef}
+                    style={this.getInnerRenderStyling()}>
+                    {this.renderTkinterLayout()} {/*This is required for pack layouts, so if your widget accepts child widgets, ensure to add this */}
                 </div>
             </div>
         )

@@ -2,10 +2,10 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { CheckSquareFilled } from "@ant-design/icons"
-import { NiceGUIWidgetBase } from "./base"
+import { TkinterWidgetBase } from "./base"
 
 
-export class CheckBox extends NiceGUIWidgetBase{
+export class CheckBox extends TkinterWidgetBase{
 
     static widgetType = "check_button"
     static displayName = "Check Box"
@@ -64,11 +64,11 @@ export class CheckBox extends NiceGUIWidgetBase{
     generateCode(variableName, parent){
 
         const labelText = this.getAttrValue("checkLabel")
-        const config = this.getConfigCode()
+        const config = convertObjectToKeyValueString(this.getConfigCode())
 
         const code = [
-                `${variableName} = ctk.CTkCheckBox(master=${parent}, text="${labelText}")`,
-                `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
+                `${variableName} = tk.Checkbutton(master=${parent}, text="${labelText}")`,
+                `${variableName}.config(${config})`,
             ]
         
         if (this.getAttrValue("defaultChecked")){
@@ -98,6 +98,7 @@ export class CheckBox extends NiceGUIWidgetBase{
         return (
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
                 style={this.getInnerRenderStyling()}
+                ref={this.styleAreaRef}
                 >
                 
                 <div className="tw-flex tw-gap-2 tw-w-full tw-h-full tw-place-items-center tw-place-content-center">
@@ -122,15 +123,18 @@ export class CheckBox extends NiceGUIWidgetBase{
 }
 
 
-export class RadioButton extends NiceGUIWidgetBase{
+export class RadioButton extends TkinterWidgetBase{
     // FIXME: the radio buttons are not visible because of the default heigh provided
 
     static widgetType = "radio_button"
+    static displayName = "Radio Button"
     
     constructor(props) {
         super(props)
 
         this.minSize = {width: 50, height: 30}
+        
+        let newAttrs = removeKeyFromObject("layout", this.state.attrs)
         
         this.state = {
             ...this.state,
@@ -138,13 +142,15 @@ export class RadioButton extends NiceGUIWidgetBase{
             fitContent: { width: true, height: true },
             widgetName: "Radio button",
             attrs: {
-                ...this.state.attrs,
+                 ...newAttrs,
                 radios: {
                     label: "Radio Group",
                     tool: Tools.INPUT_RADIO_LIST,
-                    value: {inputs: ["default"], selectedRadio: -1},
+                    value: {inputs: ["default"], selectedRadio: null},
                     onChange: ({inputs, selectedRadio}) => {
-                        this.setAttrValue("radios", {inputs, selectedRadio})
+                        this.setAttrValue("radios", {inputs, selectedRadio}, () => {
+                            console.log("attribute set: ", this.state.attrs.radios, {inputs, selectedRadio},)
+                        })
                     }
                 }
 
@@ -160,26 +166,20 @@ export class RadioButton extends NiceGUIWidgetBase{
 
     generateCode(variableName, parent){
 
-        const {border_width, ...config} = this.getConfigCode()
-
-        if (border_width){
-            // there is no border width in RadioButton
-            config["border_width_checked"] = border_width
-        }
+        const config = convertObjectToKeyValueString(this.getConfigCode())
 
         
         const code = [
-            `${variableName}_var = ctk.IntVar()`,
+            `${variableName}_var = tk.IntVar()`,
         ]
         const radios = this.getAttrValue("radios")
-        // FIXME: Error: ValueError: ['value'] are not supported arguments. Look at the documentation for supported arguments.
-
+        
         radios.inputs.forEach((radio_text, idx) => {
 
             const radioBtnVariable = `${variableName}_${idx}`
             code.push(`\n`)
-            code.push(`${radioBtnVariable} = ctk.CTkRadioButton(master=${parent}, variable=${variableName}_var, text="${radio_text}", value=${idx})`)
-            code.push(`${radioBtnVariable}.configure(${convertObjectToKeyValueString(config)})`)
+            code.push(`${radioBtnVariable} = tk.Radiobutton(master=${parent}, variable=${variableName}_var, text="${radio_text}")`)
+            code.push(`${radioBtnVariable}.config(${config}, value=${idx})`)
             code.push(`${radioBtnVariable}.${this.getLayoutCode()}`)
         })
 
@@ -213,7 +213,6 @@ export class RadioButton extends NiceGUIWidgetBase{
 
         return (
             <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
-                ref={this.styleAreaRef}
                 style={this.getInnerRenderStyling()}
                 >
                 <div className="tw-flex tw-flex-col tw-gap-2 tw-w-fit tw-h-fit">

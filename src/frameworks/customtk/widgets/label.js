@@ -1,10 +1,10 @@
 import Tools from "../../../canvas/constants/tools"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { getPythonAssetPath } from "../../utils/pythonFilePath"
-import { CustomTkWidgetBase } from "./base"
+import { NiceGUIWidgetBase } from "./base"
 
 
-class Label extends CustomTkWidgetBase{
+class Label extends NiceGUIWidgetBase{
 
     static widgetType = "label"
     static displayName = "Label"

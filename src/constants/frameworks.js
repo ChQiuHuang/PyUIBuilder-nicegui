@@ -6,7 +6,7 @@ const FrameWorks = {
     CUSTOMTK: 'customTk',
     KIVY: 'kivy',
     PYSIDE: 'PySide',
-    
+    NICEGUI: 'nicegui',
 }
 
 
