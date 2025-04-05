@@ -1,5 +1,5 @@
 import Tools from "../../../canvas/constants/tools"
-import { convertObjectToKeyValueString } from "../../../utils/common"
+import {convertObjectToKeyValueString, removeKeyFromObject} from "../../../utils/common"
 import { NiceGUIWidgetBase } from "./base"
 import {CustomTkWidgetBase} from "../../customtk/widgets/base";
 
