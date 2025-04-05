@@ -24,7 +24,7 @@ export class Button extends NiceGUIWidgetBase {
                     backgroundColor: {
                         label: "Background Color",
                         tool: Tools.COLOR_PICKER,
-                        value: "#3874ff",
+                        value: "#5898d4",
                         onChange: (value) => {
                             this.setWidgetInnerStyle("backgroundColor", value)
                             this.setAttrValue("styling.backgroundColor", value)
@@ -107,32 +107,62 @@ export class Button extends NiceGUIWidgetBase {
     }
 
     renderContent() {
-        const buttonText = this.getAttrValue("buttonText")
-        const buttonType = this.getAttrValue("buttonType")
+        const buttonText = this.getAttrValue("buttonText") || "Primary"
+        const buttonType = this.getAttrValue("buttonType") || "primary"
+        const backgroundColor = this.getAttrValue("styling.backgroundColor") || "#5898d4"
+        const foregroundColor = this.getAttrValue("styling.foregroundColor") || "#ffffff"
 
-        let buttonClass = "tw-px-4 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition-colors"
+        // Button container styles
+        const buttonStyles = { // I Steal this from Rendered NiceGUI
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            borderRadius: "4px",
+            outline: 0,
+            border: 0,
+            verticalAlign: "middle",
+            cursor: "pointer",
+            WebkitAppearance: "none",
+            MozAppearance: "none",
+            textDecoration: "none",
+            color: foregroundColor,
+            backgroundColor: backgroundColor,
+            fontWeight: 500,
+            textTransform: "uppercase",
+            minHeight: "36px",
+            overflow: "hidden",
+        }
 
-        switch(buttonType) {
-            case "primary":
-                buttonClass += " tw-bg-blue-500 tw-text-white hover:tw-bg-blue-600"
-                break
-            case "secondary":
-                buttonClass += " tw-bg-gray-500 tw-text-white hover:tw-bg-gray-600"
-                break
-            case "warning":
-                buttonClass += " tw-bg-yellow-500 tw-text-white hover:tw-bg-yellow-600"
-                break
-            case "danger":
-                buttonClass += " tw-bg-red-500 tw-text-white hover:tw-bg-red-600"
-                break
+
+        // Text container styles
+        const textContainerStyles = {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+            textAlign: "center",
+            flex: "1 1 auto"
+        }
+
+        // Text styles
+        const textStyles = {
+            display: "block"
         }
 
         return (
-            <div className="tw-flex tw-w-full tw-h-full tw-items-center tw-justify-center">
-                <button className={buttonClass} style={this.getInnerRenderStyling()}>
-                    {buttonText}
-                </button>
-            </div>
+            <button
+                style={buttonStyles}
+                tabIndex="0"
+                type="button"
+            >
+            <span
+                tabIndex="-1"
+            ></span>
+                <span style={textContainerStyles}>
+                <span style={textStyles}>{buttonText}</span>
+            </span>
+            </button>
         )
     }
 }
