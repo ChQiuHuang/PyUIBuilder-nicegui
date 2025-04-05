@@ -60,22 +60,35 @@ export class CheckBox extends NiceGUIWidgetBase{
         // this.setAttrValue("styling.backgroundColor", "#fff")
         this.setWidgetInnerStyle("backgroundColor", "#fff0")
     }
-
-    generateCode(variableName, parent){
-
+    generateCode(variableName, parent) {
         const labelText = this.getAttrValue("checkLabel")
-        const config = this.getConfigCode()
+        const isChecked = this.getAttrValue("defaultChecked")
+        const foregroundColor = this.getAttrValue("styling.foregroundColor")
 
-        const code = [
-            `${variableName} = ctk.CTkCheckBox(master=${parent}, text="${labelText}")`,
-            `${variableName}.configure(${convertObjectToKeyValueString(config)})`,
-        ]
+        const code = []
 
-        if (this.getAttrValue("defaultChecked")){
-            code.push(`${variableName}.select()`)
+        // Create the checkbox
+        if (parent) {
+            code.push(`with ${parent}:`)
+            code.push(`    ${variableName} = ui.checkbox('${labelText}', value=${isChecked ? 'True' : 'False'})`)
+        } else {
+            code.push(`${variableName} = ui.checkbox('${labelText}', value=${isChecked ? 'True' : 'False'})`)
         }
 
-        code.push(`${variableName}.${this.getLayoutCode()}`)
+        // Apply styling
+        const styles = []
+        if (foregroundColor) {
+            styles.push(`color: ${foregroundColor}`)
+        }
+
+        if (styles.length > 0) {
+            code.push(`${variableName}.style('${styles.join('; ')}')`)
+        }
+
+        // Add event handling skeleton
+        code.push(`@${variableName}.change`)
+        code.push(`def handle_change(e):`)
+        code.push(`    pass  # Handle checkbox change`)
 
         return code
     }
@@ -93,28 +106,27 @@ export class CheckBox extends NiceGUIWidgetBase{
             ...attrs,
         })
     }
+    renderContent() {
+        const isChecked = this.getAttrValue("defaultChecked")
+        const labelText = this.getAttrValue("checkLabel")
 
-    renderContent(){
         return (
-            <div className="tw-flex tw-p-1 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
+            <div className="tw-flex tw-p-2 tw-w-full tw-h-full tw-rounded-md tw-overflow-hidden"
                  style={this.getInnerRenderStyling()}
             >
-
-                <div className="tw-flex tw-gap-2 tw-w-full tw-h-full tw-place-items-center tw-place-content-center">
-                    <div className="tw-border-solid tw-border-[#D9D9D9] tw-border-2
-                                    tw-min-w-[20px] tw-min-h-[20px] tw-w-[20px] tw-h-[20px]
-                                    tw-text-blue-600 tw-flex tw-items-center tw-justify-center
-                                    tw-rounded-md tw-overflow-hidden">
-                        {
-                            this.getAttrValue("defaultChecked") === true &&
-                            <CheckSquareFilled className="tw-text-[20px]" />
-                        }
+                <div className="tw-flex tw-gap-2 tw-items-center">
+                    <div className={`tw-relative tw-inline-flex tw-select-none tw-items-center`}>
+                        <div className={`tw-relative tw-h-5 tw-w-5 tw-cursor-pointer tw-rounded-sm 
+                                    tw-border tw-border-solid tw-border-gray-300 tw-bg-white 
+                                    tw-transition-colors hover:tw-bg-gray-50 
+                                    ${isChecked ? 'tw-bg-blue-500 tw-border-blue-500' : ''}`}>
+                            {isChecked && (
+                                <CheckSquareFilled className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-text-white" />
+                            )}
+                        </div>
+                        <span className="tw-ml-2 tw-text-sm tw-text-gray-700">{labelText}</span>
                     </div>
-
-
-                    {this.getAttrValue("checkLabel")}
                 </div>
-
             </div>
         )
     }

@@ -3,8 +3,8 @@ import Tools from "../../../canvas/constants/tools"
 import Widget from "../../../canvas/widgets/base"
 import { DynamicGridWeightInput } from "../../../components/inputs"
 import { convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
-import { NiceGUI_TO_WEB_CURSOR_MAPPING } from "../constants/cursor"
-import { NiceGUI_To_GFonts } from "../constants/fontFamily"
+import { Tkinter_TO_WEB_CURSOR_MAPPING } from "../constants/cursor"
+import { Tkinter_To_GFonts } from "../constants/fontFamily"
 import { ANCHOR, GRID_STICKY, JUSTIFY, RELIEF } from "../constants/styling"
 
 
@@ -27,7 +27,8 @@ export class NiceGUIBase extends Widget {
                 anchor: "n",
             }
         }
-
+// changed for support
+        this.renderTkinterLayout = this.renderNiceGUILayout;
         this.renderNiceGUILayout = this.renderNiceGUILayout.bind(this) // this must be called if droppableTags is not set to null
 
         const originalRenderContent = this.renderContent.bind(this);
@@ -110,18 +111,18 @@ export class NiceGUIBase extends Widget {
 
             if (packSide === "" || packSide === "top"){
 
-                config['side'] = `ctk.TOP`
+                config['side'] = `ui.TOP`
 
             }else if (packSide === "left"){
 
-                config['side'] = `ctk.LEFT`
+                config['side'] = `ui.LEFT`
 
             }else if (packSide === "right"){
 
-                config['side'] = `ctk.RIGHT`
+                config['side'] = `ui.RIGHT`
 
             }else{
-                config['side'] = `ctk.BOTTOM`
+                config['side'] = `ui.BOTTOM`
             }
 
             // if (gap > 0){
@@ -357,16 +358,7 @@ export class NiceGUIBase extends Widget {
                                 options: ["left", "right", "top", "bottom", ""].map(val => ({value: val, label: val})),
                                 value: this.state.packAttrs.side,
                                 onChange: (value) => {
-                                    this.setAttrValue("flexManager.side", value, () => {
-                                        this.updateState((prevState) => ({packAttrs: {...prevState.packAttrs, side: value}}), () => {
-
-                                            // this.props.parentWidgetRef.current.forceRerender()
-                                            this.props.requestWidgetDataUpdate(this.props.parentWidgetRef.current.__id)
-                                            this.stateChangeSubscriberCallback() // call this to notify the toolbar that the widget has changed state
-                                        })
-
-
-                                    })
+                                    this.setAttrValue("flexManager.side", value)
 
 
                                     // console.log("updateing state: ", value, this.props.parentWidgetRef.current)
@@ -388,9 +380,7 @@ export class NiceGUIBase extends Widget {
                                 options: ANCHOR.map(val => ({value: val, label: val})),
                                 value: this.state.packAttrs.anchor,
                                 onChange: (value) => {
-                                    this.setAttrValue("flexManager.anchor", value, () => {
-                                        // this.props.parentWidgetRef.current.forceRerender()
-                                    })
+                                    this.setAttrValue("flexManager.anchor", value)
                                     this.updateState((prevState) => ({packAttrs: {...prevState.packAttrs, anchor: value}}), () => {
 
                                         // this.props.requestWidgetDataUpdate(this.props.parentWidgetRef.current.__id)
@@ -1156,10 +1146,10 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     fontFamily: {
                         label: "font family",
                         tool: Tools.SELECT_DROPDOWN,
-                        options: Object.keys(NiceGUI_To_GFonts).map((val) => ({value: val, label: val})),
+                        options: Object.keys(Tkinter_To_GFonts).map((val) => ({value: val, label: val})),
                         value: "",
                         onChange: (value) => {
-                            this.setWidgetInnerStyle("fontFamily", NiceGUI_To_GFonts[value])
+                            this.setWidgetInnerStyle("fontFamily", Tkinter_To_GFonts[value])
                             this.setAttrValue("font.fontFamily", value)
                         }
                     },
@@ -1179,9 +1169,9 @@ export class NiceGUIWidgetBase extends NiceGUIBase{
                     tool: Tools.SELECT_DROPDOWN,
                     toolProps: {placeholder: "select cursor"},
                     value: "",
-                    options: Object.keys(NiceGUI_TO_WEB_CURSOR_MAPPING).map((val) => ({value: val, label: val})),
+                    options: Object.keys(Tkinter_TO_WEB_CURSOR_MAPPING).map((val) => ({value: val, label: val})),
                     onChange: (value) => {
-                        this.setWidgetInnerStyle("cursor", NiceGUI_TO_WEB_CURSOR_MAPPING[value])
+                        this.setWidgetInnerStyle("cursor", Tkinter_TO_WEB_CURSOR_MAPPING[value])
                         this.setAttrValue("cursor", value)
                     }
                 },

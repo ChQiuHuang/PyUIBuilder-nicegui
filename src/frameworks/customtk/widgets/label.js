@@ -47,7 +47,7 @@ class Label extends CustomTkWidgetBase{
         
         
         this.setAttrValue("styling.backgroundColor", "#E4E2E2")
-          
+
         // this.setWidgetName("label") // Don't do this this causes issues while loading data
 
     }

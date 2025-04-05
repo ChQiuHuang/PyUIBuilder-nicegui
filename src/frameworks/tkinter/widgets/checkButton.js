@@ -148,9 +148,7 @@ export class RadioButton extends TkinterWidgetBase{
                     tool: Tools.INPUT_RADIO_LIST,
                     value: {inputs: ["default"], selectedRadio: null},
                     onChange: ({inputs, selectedRadio}) => {
-                        this.setAttrValue("radios", {inputs, selectedRadio}, () => {
-                            console.log("attribute set: ", this.state.attrs.radios, {inputs, selectedRadio},)
-                        })
+                        this.setAttrValue("radios", {inputs, selectedRadio})
                     }
                 }
 

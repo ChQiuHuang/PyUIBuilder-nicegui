@@ -546,6 +546,7 @@ class Widget extends React.Component {
      * @param {string} path - path to the key, eg: styling.backgroundColor
      * @param {any} value 
      */
+    // Callback??
     setAttrValue(path, value, callback) {
 
         this.updateState((prevState) => { // since the  setState is Async only the prevState contains the latest state
@@ -740,12 +741,7 @@ class Widget extends React.Component {
         //     widgetStyle["placeContent"] = "unset"
         // }
 
-        this.setAttrValue("layout", value, () => {
-            this.updateState({
-                widgetInnerStyling: widgetStyle
-            })
-            this.props.onLayoutUpdate({parentId: this.__id, parentLayout: value})// inform children about the layout update
-        })
+        this.setAttrValue("layout", value)
 
     }
 

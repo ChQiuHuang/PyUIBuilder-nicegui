@@ -1,155 +1,139 @@
 import Tools from "../../../canvas/constants/tools"
-import { convertObjectToKeyValueString } from "../../../utils/common"
+import {convertObjectToKeyValueString, removeKeyFromObject } from "../../../utils/common"
 import { NiceGUIWidgetBase } from "./base"
 
-class Button extends NiceGUIWidgetBase {
+export class Button extends NiceGUIWidgetBase {
     static widgetType = "button"
     static displayName = "Button"
 
     constructor(props) {
         super(props)
 
+        let newAttrs = removeKeyFromObject("layout", this.state.attrs)
+
+        this.minSize = {width: 80, height: 36}
+
         this.state = {
             ...this.state,
-            size: { width: 80, height: 40 },
+            size: { width: 120, height: 36 },
             widgetName: "Button",
             attrs: {
-                ...this.state.attrs,
-                buttonLabel: {
-                    label: "Button Label",
-                    tool: Tools.INPUT,
-                    toolProps: {placeholder: "Button label", maxLength: 100},
-                    value: "Button",
-                    onChange: (value) => this.setAttrValue("buttonLabel", value)
+                ...newAttrs,
+                styling: {
+                    ...newAttrs.styling,
+                    backgroundColor: {
+                        label: "Background Color",
+                        tool: Tools.COLOR_PICKER,
+                        value: "#3874ff",
+                        onChange: (value) => {
+                            this.setWidgetInnerStyle("backgroundColor", value)
+                            this.setAttrValue("styling.backgroundColor", value)
+                        }
+                    },
+                    foregroundColor: {
+                        label: "Text Color",
+                        tool: Tools.COLOR_PICKER,
+                        value: "#ffffff",
+                        onChange: (value) => {
+                            this.setWidgetInnerStyle("color", value)
+                            this.setAttrValue("styling.foregroundColor", value)
+                        }
+                    }
                 },
-                buttonColor: {
-                    label: "Button Color",
-                    tool: Tools.COLOR_PICKER,
-                    value: "primary", // NiceGUI default color
-                    onChange: (value) => this.setAttrValue("buttonColor", value)
-                },
-                buttonIcon: {
-                    label: "Button Icon",
+                buttonText: {
+                    label: "Button Text",
                     tool: Tools.INPUT,
-                    toolProps: {placeholder: "Icon name (optional)"},
-                    value: "",
-                    onChange: (value) => this.setAttrValue("buttonIcon", value)
+                    toolProps: {placeholder: "Button text", maxLength: 100},
+                    value: "Click me",
+                    onChange: (value) => this.setAttrValue("buttonText", value)
                 },
-                onClickFunction: {
-                    label: "On Click Function",
-                    tool: Tools.INPUT,
-                    toolProps: {placeholder: "Function to call on click"},
-                    value: "",
-                    onChange: (value) => this.setAttrValue("onClickFunction", value)
+                buttonType: {
+                    label: "Button Type",
+                    tool: Tools.SELECT,
+                    options: [
+                        {label: "Primary", value: "primary"},
+                        {label: "Secondary", value: "secondary"},
+                        {label: "Warning", value: "warning"},
+                        {label: "Danger", value: "danger"}
+                    ],
+                    value: "primary",
+                    onChange: (value) => this.setAttrValue("buttonType", value)
                 }
             }
         }
     }
 
-    componentDidMount() {
-        super.componentDidMount()
-        this.setAttrValue("styling.backgroundColor", "#E4E2E2")
-    }
-
     generateCode(variableName, parent) {
-        const labelText = this.getAttrValue("buttonLabel")
-        const buttonColor = this.getAttrValue("buttonColor") || "primary"
-        const buttonIcon = this.getAttrValue("buttonIcon") || "None"
-        const onClickFunction = this.getAttrValue("onClickFunction") || "None"
+        const buttonText = this.getAttrValue("buttonText")
+        const buttonType = this.getAttrValue("buttonType")
 
-        // Format the function parameter properly
-        const onClickParam = onClickFunction && onClickFunction !== "None"
-            ? `on_click=${onClickFunction}`
-            : "";
+        const code = []
 
-        // Format the icon parameter properly
-        const iconParam = buttonIcon && buttonIcon !== "None"
-            ? `icon="${buttonIcon}"`
-            : "";
+        // Create the button
+        if (parent) {
+            code.push(`with ${parent}:`)
+            code.push(`    ${variableName} = ui.button('${buttonText}')`)
+        } else {
+            code.push(`${variableName} = ui.button('${buttonText}')`)
+        }
 
-        const params = [
-            `text="${labelText}"`,
-            `color="${buttonColor}"`,
-            iconParam,
-            onClickParam
-        ].filter(Boolean).join(", ");
+        // Apply styling
+        const styleClasses = []
+        switch(buttonType) {
+            case "primary":
+                styleClasses.push('bg-blue-500 text-white')
+                break
+            case "secondary":
+                styleClasses.push('bg-gray-500 text-white')
+                break
+            case "warning":
+                styleClasses.push('bg-yellow-500 text-white')
+                break
+            case "danger":
+                styleClasses.push('bg-red-500 text-white')
+                break
+        }
 
-        return [
-            `${variableName} = ui.button(${params})`,
-        ]
-    }
+        if (styleClasses.length > 0) {
+            code.push(`${variableName}.classes('${styleClasses.join(' ')}')`)
+        }
 
-    getToolbarAttrs() {
-        const toolBarAttrs = super.getToolbarAttrs()
+        // Add event handling
+        code.push(`@${variableName}.click`)
+        code.push(`def handle_click():`)
+        code.push(`    pass  # Handle button click`)
 
-        return ({
-            id: this.__id,
-            widgetName: toolBarAttrs.widgetName,
-            buttonLabel: this.state.attrs.buttonLabel,
-            buttonColor: this.state.attrs.buttonColor,
-            buttonIcon: this.state.attrs.buttonIcon,
-            onClickFunction: this.state.attrs.onClickFunction,
-            size: toolBarAttrs.size,
-            ...this.state.attrs,
-        })
+        return code
     }
 
     renderContent() {
-        const buttonColor = this.getAttrValue("buttonColor") || "primary"
-        const buttonIcon = this.getAttrValue("buttonIcon")
-        const label = this.getAttrValue("buttonLabel")
+        const buttonText = this.getAttrValue("buttonText")
+        const buttonType = this.getAttrValue("buttonType")
 
-        // Map NiceGUI color keywords to hex values (customize if needed)
-        const colorMap = {
-            'primary': '#1976D2',
-            'secondary': '#26A69A',
-            'accent': '#9C27B0',
-            'positive': '#21BA45',
-            'negative': '#C10015',
-            'info': '#31CCEC',
-            'warning': '#F2C037'
+        let buttonClass = "tw-px-4 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition-colors"
+
+        switch(buttonType) {
+            case "primary":
+                buttonClass += " tw-bg-blue-500 tw-text-white hover:tw-bg-blue-600"
+                break
+            case "secondary":
+                buttonClass += " tw-bg-gray-500 tw-text-white hover:tw-bg-gray-600"
+                break
+            case "warning":
+                buttonClass += " tw-bg-yellow-500 tw-text-white hover:tw-bg-yellow-600"
+                break
+            case "danger":
+                buttonClass += " tw-bg-red-500 tw-text-white hover:tw-bg-red-600"
+                break
         }
 
-        const backgroundColor = colorMap[buttonColor] || buttonColor
-        const textColor = this.isLightColor(backgroundColor) ? '#000000' : '#ffffff'
-
         return (
-            <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-                <button
-                    ref={this.styleAreaRef}
-                    className="tw-px-4 tw-py-2 tw-rounded-2xl tw-shadow-md tw-text-sm tw-font-medium tw-flex tw-items-center tw-gap-2 tw-transition-all hover:tw-brightness-90"
-                    style={{
-                        backgroundColor: backgroundColor,
-                        color: textColor,
-                        border: 'none',
-                        cursor: 'pointer'
-                    }}
-                >
-                    {buttonIcon && (
-                        <i className="material-icons tw-text-base">{buttonIcon}</i>
-                    )}
-                    {label}
+            <div className="tw-flex tw-w-full tw-h-full tw-items-center tw-justify-center">
+                <button className={buttonClass} style={this.getInnerRenderStyling()}>
+                    {buttonText}
                 </button>
             </div>
         )
     }
-
-
-    // Helper method to determine if text should be dark or light based on background
-    isLightColor(color) {
-        // Simple implementation - can be improved
-        const isHex = color.startsWith('#')
-        if (!isHex) return false;
-
-        // Convert hex to RGB and check lightness
-        const hex = color.replace('#', '')
-        const r = parseInt(hex.substr(0, 2), 16)
-        const g = parseInt(hex.substr(2, 2), 16)
-        const b = parseInt(hex.substr(4, 2), 16)
-
-        // Formula to determine perceived brightness
-        return (r * 0.299 + g * 0.587 + b * 0.114) > 150
-    }
 }
-
 export default Button

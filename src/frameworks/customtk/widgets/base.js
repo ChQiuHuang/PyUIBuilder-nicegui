@@ -357,16 +357,7 @@ export class CustomTkBase extends Widget {
                                 options: ["left", "right", "top", "bottom", ""].map(val => ({value: val, label: val})),
                                 value: this.state.packAttrs.side,
                                 onChange: (value) => {
-                                    this.setAttrValue("flexManager.side", value, () => {
-                                        this.updateState((prevState) => ({packAttrs: {...prevState.packAttrs, side: value}}), () => {
-
-                                            // this.props.parentWidgetRef.current.forceRerender()
-                                            this.props.requestWidgetDataUpdate(this.props.parentWidgetRef.current.__id)
-                                            this.stateChangeSubscriberCallback() // call this to notify the toolbar that the widget has changed state
-                                        })
-
-
-                                    })
+                                    this.setAttrValue("flexManager.side", value)
 
 
                                     // console.log("updateing state: ", value, this.props.parentWidgetRef.current)
@@ -388,9 +379,7 @@ export class CustomTkBase extends Widget {
                                 options: ANCHOR.map(val => ({value: val, label: val})),
                                 value: this.state.packAttrs.anchor,
                                 onChange: (value) => {
-                                    this.setAttrValue("flexManager.anchor", value, () => {
-                                        // this.props.parentWidgetRef.current.forceRerender()
-                                    })
+                                    this.setAttrValue("flexManager.anchor", value)
                                     this.updateState((prevState) => ({packAttrs: {...prevState.packAttrs, anchor: value}}), () => {
 
                                         // this.props.requestWidgetDataUpdate(this.props.parentWidgetRef.current.__id)
