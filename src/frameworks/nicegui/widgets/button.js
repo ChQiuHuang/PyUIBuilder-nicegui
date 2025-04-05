@@ -18,6 +18,13 @@ export class Button extends NiceGUIWidgetBase {
             size: { width: 120, height: 36 },
             widgetName: "Button",
             attrs: {
+                buttonText: {
+                    label: "Button Text",
+                    tool: Tools.INPUT,
+                    toolProps: {placeholder: "Button text", maxLength: 100},
+                    value: "Click me",
+                    onChange: (value) => this.setAttrValue("buttonText", value)
+                },
                 ...newAttrs,
                 styling: {
                     ...newAttrs.styling,
@@ -39,26 +46,8 @@ export class Button extends NiceGUIWidgetBase {
                             this.setAttrValue("styling.foregroundColor", value)
                         }
                     }
-                },
-                buttonText: {
-                    label: "Button Text",
-                    tool: Tools.INPUT,
-                    toolProps: {placeholder: "Button text", maxLength: 100},
-                    value: "Click me",
-                    onChange: (value) => this.setAttrValue("buttonText", value)
-                },
-                buttonType: {
-                    label: "Button Type",
-                    tool: Tools.SELECT,
-                    options: [
-                        {label: "Primary", value: "primary"},
-                        {label: "Secondary", value: "secondary"},
-                        {label: "Warning", value: "warning"},
-                        {label: "Danger", value: "danger"}
-                    ],
-                    value: "primary",
-                    onChange: (value) => this.setAttrValue("buttonType", value)
                 }
+
             }
         }
     }
@@ -77,26 +66,7 @@ export class Button extends NiceGUIWidgetBase {
             code.push(`${variableName} = ui.button('${buttonText}')`)
         }
 
-        // Apply styling
-        const styleClasses = []
-        switch(buttonType) {
-            case "primary":
-                styleClasses.push('bg-blue-500 text-white')
-                break
-            case "secondary":
-                styleClasses.push('bg-gray-500 text-white')
-                break
-            case "warning":
-                styleClasses.push('bg-yellow-500 text-white')
-                break
-            case "danger":
-                styleClasses.push('bg-red-500 text-white')
-                break
-        }
-
-        if (styleClasses.length > 0) {
-            code.push(`${variableName}.classes('${styleClasses.join(' ')}')`)
-        }
+        code.push(`${variableName}.classes('bg-blue-500 text-white')`)
 
         // Add event handling
         code.push(`@${variableName}.click`)
@@ -107,17 +77,17 @@ export class Button extends NiceGUIWidgetBase {
     }
 
     renderContent() {
-        const buttonText = this.getAttrValue("buttonText") || "Primary"
-        const buttonType = this.getAttrValue("buttonType") || "primary"
+        const buttonText = this.getAttrValue("buttonText") || "IDK WHY THIS IS HERE, BUT IT IS."
         const backgroundColor = this.getAttrValue("styling.backgroundColor") || "#5898d4"
         const foregroundColor = this.getAttrValue("styling.foregroundColor") || "#ffffff"
 
         // Button container styles
-        const buttonStyles = { // I Steal this from Rendered NiceGUI
+        const buttonStyles = { // I Steal this from Rendered NiceGUI, -What you just see, is ass.-
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
+            padding: "0.285em 0.857em",
             borderRadius: "4px",
             outline: 0,
             border: 0,
@@ -129,11 +99,14 @@ export class Button extends NiceGUIWidgetBase {
             color: foregroundColor,
             backgroundColor: backgroundColor,
             fontWeight: 500,
-            textTransform: "uppercase",
+            letterSpacing: "0.0892857143em",
             minHeight: "36px",
+            transition: "background-color 0.3s, color 0.3s",
             overflow: "hidden",
+            userSelect: "none",
+            width: "100%",
+            height: "100%"
         }
-
 
         // Text container styles
         const textContainerStyles = {

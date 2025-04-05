@@ -50,7 +50,7 @@ class MainWindow extends NiceGUIBase{
     }
 
     componentDidMount(){
-        this.setAttrValue("styling.backgroundColor", "#23272D")
+        this.setAttrValue("styling.backgroundColor", "#ffffff")
         super.componentDidMount()
         // this.setWidgetName("main") // Don't do this as this will cause conflicts while loading names
     }
@@ -63,10 +63,11 @@ class MainWindow extends NiceGUIBase{
         const {width, height} = this.getSize()
 
         const code = [
-            `${variableName} = ctk.CTk()`,
-            `${variableName}.configure(fg_color="${backgroundColor}")`,
-            `${variableName}.title("${this.getAttrValue("title")}")`,
-            `${variableName}.geometry("${width}x${height}")`,
+            // NiceGUI dont really need a main Window...
+            //`${variableName} = ctk.CTk()`,
+            //`${variableName}.configure(fg_color="${backgroundColor}")`,
+            //`${variableName}.title("${this.getAttrValue("title")}")`,
+            //`${variableName}.geometry("${width}x${height}")`,
             ...this.getGridLayoutConfigurationCode(variableName)
         ]
 

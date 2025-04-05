@@ -77,22 +77,32 @@ export class Input extends NiceGUIWidgetBase {
 
         return code
     }
-
-    renderContent() {
+    renderContent() { // just a text and a line
         const placeholder = this.getAttrValue("placeholder")
-        const inputType = this.getAttrValue("inputType")
+        // const inputType = this.getAttrValue("inputType")
+        const innerStyling = this.getInnerRenderStyling()
 
         return (
-            <div className="tw-flex tw-w-full tw-h-full tw-items-center tw-justify-center">
-                <input
-                    type={inputType}
-                    placeholder={placeholder}
-                    className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
-                    style={this.getInnerRenderStyling()}
-                />
+            <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+                <div className="tw-max-w-xs tw-w-full">
+                    <label
+                        className="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1"
+                    >
+                        Text
+                    </label>
+                    <div
+                        className="tw-w-full tw-border-b tw-border-gray-300 tw-py-2 tw-text-gray-700 focus:tw-outline-none tw-bg-transparent"
+                        tabIndex="0"
+                        style={innerStyling}
+                    >
+                        {placeholder}
+                    </div>
+                </div>
             </div>
         )
     }
+
+
 }
 
 export class Text extends NiceGUIWidgetBase { // Ahh yes, "Text"
