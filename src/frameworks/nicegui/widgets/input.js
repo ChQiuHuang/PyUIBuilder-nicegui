@@ -20,6 +20,25 @@ export class Input extends NiceGUIWidgetBase {
             size: { width: 200, height: 36 },
             widgetName: "Input",
             attrs: {
+                placeholder: {
+                    label: "Placeholder",
+                    tool: Tools.INPUT,
+                    toolProps: {placeholder: "Placeholder text", maxLength: 100},
+                    value: "Enter text...",
+                    onChange: (value) => this.setAttrValue("placeholder", value)
+                },
+                inputType: {
+                    label: "Input Type",
+                    tool: Tools.SELECT_DROPDOWN,
+                    options: [
+                        {label: "Text", value: "text"},
+                        {label: "Number", value: "number"},
+                        {label: "Password", value: "password"},
+                        {label: "Email", value: "email"}
+                    ],
+                    value: "text",
+                    onChange: (value) => this.setAttrValue("inputType", value)
+                },
                 ...newAttrs,
                 styling: {
                     ...newAttrs.styling,
@@ -32,26 +51,8 @@ export class Input extends NiceGUIWidgetBase {
                             this.setAttrValue("styling.foregroundColor", value)
                         }
                     }
-                },
-                placeholder: {
-                    label: "Placeholder",
-                    tool: Tools.INPUT,
-                    toolProps: {placeholder: "Placeholder text", maxLength: 100},
-                    value: "Enter text...",
-                    onChange: (value) => this.setAttrValue("placeholder", value)
-                },
-                inputType: {
-                    label: "Input Type",
-                    tool: Tools.SELECT,
-                    options: [
-                        {label: "Text", value: "text"},
-                        {label: "Number", value: "number"},
-                        {label: "Password", value: "password"},
-                        {label: "Email", value: "email"}
-                    ],
-                    value: "text",
-                    onChange: (value) => this.setAttrValue("inputType", value)
                 }
+
             }
         }
     }
